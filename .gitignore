@@ -1,0 +1,31 @@
+# ===============================
+# .NET Build Folders & Files
+# ===============================
+# Ignore build output directories
+[Bb]in/
+[Oo]bj/
+artifacts/
+
+# Ignore NuGet packages and related files
+*.nupkg
+.nuget/
+
+# ===============================
+# OS Generated Files
+# ===============================
+.DS_Store
+Thumbs.db
+
+# ===============================
+# Visual Studio Files (if applicable)
+# ===============================
+# These files are generally created by Visual Studio but might appear in multi-IDE projects
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# ===============================
+# Log & Debug Files
+# ===============================
+*.log

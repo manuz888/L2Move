@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LiveToMoveUI", "LiveToMoveUI\LiveToMoveUI.csproj", "{96792E07-824C-423B-A442-DD253D7FE0B1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{96792E07-824C-423B-A442-DD253D7FE0B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{96792E07-824C-423B-A442-DD253D7FE0B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{96792E07-824C-423B-A442-DD253D7FE0B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{96792E07-824C-423B-A442-DD253D7FE0B1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
