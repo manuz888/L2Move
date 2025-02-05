@@ -14,5 +14,7 @@
     
     <Application.Resources>
         <FontFamily x:Key="SilkscreenFont">avares://LiveToMoveUI/Assets/Silkscreen-Regular.ttf#Silkscreen</FontFamily>
+        <FontFamily x:Key="PressStartFont">avares://LiveToMoveUI/Assets/PressStart2P-Regular.ttf#</FontFamily>
+        <FontFamily x:Key="MunroFont">avares://LiveToMoveUI/Assets/Munro.ttf#</FontFamily>
     </Application.Resources>
 </Application>

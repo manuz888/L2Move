@@ -18,16 +18,16 @@
     <Grid RowDefinitions="Auto,Auto,*,Auto,Auto,*" Background="Black">
         <TextBlock Grid.Row="0" 
                    TextAlignment="Left"
-                   FontSize="23"
-                   FontFamily="{StaticResource SilkscreenFont}"
-                   Margin="10,0,0,0">
+                   FontSize="45"
+                   FontFamily="{StaticResource MunroFont}"
+                   Margin="10,10,0,0">
             L2Move
         </TextBlock>
         <TextBlock Grid.Row="1" 
                    TextAlignment="Left"
-                   FontSize="30"
-                   FontFamily="{StaticResource SilkscreenFont}"
-                   Margin="10,0,0,0">
+                   FontSize="20"
+                   FontFamily="{StaticResource MunroFont}"
+                   Margin="10,-12,0,0">
             :Drum
         </TextBlock>
         
@@ -39,8 +39,8 @@
                 DragDrop.AllowDrop="True">
             <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
                        TextAlignment="Center"
-                       FontFamily="{StaticResource SilkscreenFont}">
-                Drop here .adg<LineBreak/>or directory
+                       FontFamily="{StaticResource MunroFont}">
+                Drop here a drum file .adg<LineBreak/>or directory
             </TextBlock>
         </Border>
         
@@ -50,7 +50,7 @@
                 BorderBrush="White" BorderThickness="2" CornerRadius="5"
                 Content="Start process"
                 Width="200" Height="40"
-                FontFamily="{StaticResource SilkscreenFont}" >
+                FontFamily="{StaticResource MunroFont}" >
             <Button.Styles>
                 <Style Selector="Button:pointerover /template/ ContentPresenter">
                     <Setter Property="Background" Value="White"/>
