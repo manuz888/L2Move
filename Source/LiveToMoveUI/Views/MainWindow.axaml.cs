@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -9,51 +10,63 @@ namespace LiveToMoveUI.Views;
 
 public partial class MainWindow : Window
 {
+    private string _dropBoxLabelText;
+    
     public MainWindow()
     {
         InitializeComponent();
 
-        AddHandler(DragDrop.DropEvent, Drop);
-        AddHandler(DragDrop.DragOverEvent, DragOver);
+        _dropBoxLabelText = this.DropBoxBlock.Text;
+
+        this.ResultBlock.Opacity = 0;
+        this.ProcessButton.Click += this.OnProcessClicked;
+        
+        this.AddHandler(DragDrop.DropEvent, this.OnDrop);
+        this.AddHandler(DragDrop.DragOverEvent, this.OnDragOver);
     }
 
-    private void DragOver(object? sender, DragEventArgs e)
+    private void OnDragOver(object? sender, DragEventArgs e)
     {
         e.DragEffects &= DragDropEffects.Copy;
     }
 
-    private async void OnOkClicked(object? sender, RoutedEventArgs e)
+    private async void OnProcessClicked(object? sender, RoutedEventArgs e)
     {
-        var processText = processButton.Content;
+        var processText = this.ProcessButton.Content;
         this.IsEnabled = false;
 
         var cts = new CancellationTokenSource();
-        _ = this.AnimateButtonText(processButton, "Processing", cts.Token);
+        _ = this.AnimateButtonText(this.ProcessButton, "Processing", cts.Token);
         
         try
         {
-            // Simula un'operazione lunga
             for (int i = 0; i <= 100; i += 10)
             {
-                await Task.Delay(500); // Simula un lavoro lungo
+                await Task.Delay(500, cts.Token);
             }
         }
         finally
         {
             await cts.CancelAsync();
 
-            processButton.Content = processText;
+            this.ProcessButton.Content = processText;
             this.IsEnabled = true;
+            
+            this.ResultBlock.Opacity = 1;
         }
     }
     
-    private void Drop(object? sender, DragEventArgs e)
+    private void OnDrop(object? sender, DragEventArgs e)
     {
         e.DragEffects &= DragDropEffects.Copy;
 
         if (e.Data.Contains(DataFormats.Files))
         {
-            // DropState.Text = e.Data.GetFiles()?.FirstOrDefault()?.Path.ToString();
+            var file = e.Data.GetFiles()?.FirstOrDefault();
+            if (file != null)
+            {
+                this.DropBoxBlock.Text = file.Name;
+            }
         }
     }
     

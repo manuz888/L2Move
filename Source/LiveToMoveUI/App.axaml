@@ -4,10 +4,20 @@
              RequestedThemeVariant="Dark">
     
     <Application.Styles>
-        <FluentTheme />
+        <FluentTheme/>
         
         <Style Selector=":is(TopLevel)">
             <Setter Property="FontFamily" Value="avares://LiveToMoveUI/Assets/VPPixel-Standard.ttf#VP Pixel"/>
+        </Style>
+        
+        <Style Selector="Button /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="White"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
         </Style>
         
         <Style Selector="Button:pointerover /template/ ContentPresenter">
