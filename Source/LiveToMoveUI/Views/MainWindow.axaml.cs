@@ -1,16 +1,21 @@
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 using Avalonia.Input;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+
+using LiveToMoveUI.Core;
 
 namespace LiveToMoveUI.Views;
 
 public partial class MainWindow : Window
 {
     private string _dropBoxLabelText;
+    public List<string> _sourcePathList;
     
     public MainWindow()
     {
@@ -40,10 +45,7 @@ public partial class MainWindow : Window
         
         try
         {
-            for (int i = 0; i <= 100; i += 10)
-            {
-                await Task.Delay(500, cts.Token);
-            }
+            DrumRack.Process(_sourcePathList);
         }
         finally
         {
@@ -63,10 +65,31 @@ public partial class MainWindow : Window
         if (e.Data.Contains(DataFormats.Files))
         {
             var file = e.Data.GetFiles()?.FirstOrDefault();
-            if (file != null)
+            if (file == null)
             {
-                this.DropBoxBlock.Text = file.Name;
+                return;
             }
+
+            var localPath = file.Path?.LocalPath;
+            if (string.IsNullOrEmpty(localPath))
+            {
+                return;
+            }
+
+            if (File.Exists(localPath))
+            {
+                _sourcePathList = [localPath];
+            }
+            else if (Directory.Exists(localPath))
+            {
+                _sourcePathList = Directory.GetFiles(localPath, "*.adg")?.ToList();
+                if (_sourcePathList == null || _sourcePathList.Count == 0)
+                {
+                    return;
+                }
+            }
+            
+            this.DropBoxBlock.Text = file.Name;
         }
     }
     
