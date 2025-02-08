@@ -10,11 +10,25 @@
   
     <Application.Styles>
         <FluentTheme />
+        
+        <Style Selector=":is(TopLevel)">
+            <Setter Property="FontFamily" Value="avares://LiveToMoveUI/Assets/VPPixel-Standard.ttf#VP Pixel"/>
+        </Style>
+        
+        <Style Selector="Button:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="Black"/>
+        </Style>
+        
+        <Style Selector="CheckBox:checked">
+            <Style Selector="^ /template/ Border#NormalRectangle">
+                <Setter Property="Background" Value="White"/>
+                <Setter Property="BorderBrush" Value="White"/>
+            </Style>
+            
+            <Style Selector="^ /template/ Path#CheckGlyph">
+                <Setter Property="Fill" Value="Black"/>
+            </Style>
+        </Style>
     </Application.Styles>
-    
-    <Application.Resources>
-        <FontFamily x:Key="SilkscreenFont">avares://LiveToMoveUI/Assets/Silkscreen-Regular.ttf#Silkscreen</FontFamily>
-        <FontFamily x:Key="PressStartFont">avares://LiveToMoveUI/Assets/PressStart2P-Regular.ttf#</FontFamily>
-        <FontFamily x:Key="MunroFont">avares://LiveToMoveUI/Assets/Munro.ttf#</FontFamily>
-    </Application.Resources>
 </Application>
