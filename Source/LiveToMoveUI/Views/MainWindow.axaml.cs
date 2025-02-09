@@ -7,34 +7,74 @@ using System.Collections.Generic;
 using Avalonia.Input;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-
+using Avalonia.Media;
 using LiveToMoveUI.Core;
 
 namespace LiveToMoveUI.Views;
 
 public partial class MainWindow : Window
 {
-    private string _dropBoxLabelText;
     private List<string> _sourcePathList;
     
     public MainWindow()
     {
         InitializeComponent();
 
-        _dropBoxLabelText = this.DropBoxBlock?.Text ?? string.Empty;
-
         this.ResultBlock.Opacity = 0;
         
         this.ProcessButton.IsEnabled = false;
         this.ProcessButton.Click += this.OnProcessClicked;
         
-        this.AddHandler(DragDrop.DropEvent, this.OnDrop);
         this.AddHandler(DragDrop.DragOverEvent, this.OnDragOver);
+        this.AddHandler(DragDrop.DropEvent, this.OnDrop);
     }
-
-    private void OnDragOver(object? sender, DragEventArgs e)
+    
+    private void OnDragOver(object? sender, DragEventArgs eventArgs)
     {
-        e.DragEffects &= DragDropEffects.Copy;
+        eventArgs.Handled = true;
+        
+        // To prevent the drag
+        eventArgs.DragEffects = DragDropEffects.None;
+
+        if (!Helpers.GetLocalPathFromDragEvent(eventArgs, out var localPath))
+        {
+            return;
+        }
+        
+        var extension = Path.GetExtension(localPath);
+        if (extension == ".adg" || (Directory.Exists(localPath) && Helpers.GetFilesFromPathByExtension(".adg", localPath, out _)))
+        {
+            eventArgs.DragEffects = DragDropEffects.Copy;
+        }
+    }
+    
+    private void OnDrop(object? sender, DragEventArgs eventArgs)
+    {
+        if (!Helpers.GetLocalPathFromDragEvent(eventArgs, out var localPath))
+        {
+            return;
+        }
+
+        var prefix = string.Empty;
+        if (File.Exists(localPath))
+        {
+            prefix = "File:";
+            
+            _sourcePathList = [localPath];
+        }
+        else if (Directory.Exists(localPath))
+        {
+            prefix = "Directory:";
+            
+            Helpers.GetFilesFromPathByExtension(".adg", localPath, out _sourcePathList);
+        }
+        else
+        {
+            // TODO: manage error
+        }
+
+        this.ProcessButton.IsEnabled = true;
+        this.DropBoxBlock.Text = $"{prefix} {Path.GetFileName(localPath)}";
     }
 
     private async void OnProcessClicked(object? sender, RoutedEventArgs e)
@@ -45,55 +85,36 @@ public partial class MainWindow : Window
         var cts = new CancellationTokenSource();
         _ = this.AnimateButtonText(this.ProcessButton, "Processing", cts.Token);
         
-        try
+        var result = DrumRackProcessor.Process(_sourcePathList);
+        
+        var successCount = 0;
+        foreach (var sourcePath in _sourcePathList)
         {
-            DrumRack.Process(_sourcePathList);
+            successCount += result[sourcePath] == DrumRackProcessor.ProcessingResult.Ok ? 1 : 0;
         }
-        finally
+
+        if (successCount == _sourcePathList.Count)
         {
-            await cts.CancelAsync();
-
-            this.ProcessButton.Content = processText;
-            this.IsEnabled = true;
-            
-            this.ResultBlock.Opacity = 1;
+            this.ResultBlockLabel.Text = "Result: OK";
+            this.ResultBlock.Background = Brushes.LightGreen;
         }
-    }
-    
-    private void OnDrop(object? sender, DragEventArgs e)
-    {
-        e.DragEffects &= DragDropEffects.Copy;
-
-        if (e.Data.Contains(DataFormats.Files))
+        else if (successCount == 0)
         {
-            var file = e.Data.GetFiles()?.FirstOrDefault();
-            if (file == null)
-            {
-                return;
-            }
-
-            var localPath = file.Path?.LocalPath;
-            if (string.IsNullOrEmpty(localPath))
-            {
-                return;
-            }
-
-            if (File.Exists(localPath))
-            {
-                _sourcePathList = [localPath];
-            }
-            else if (Directory.Exists(localPath))
-            {
-                _sourcePathList = Directory.GetFiles(localPath, "*.adg")?.ToList();
-                if (_sourcePathList == null || _sourcePathList.Count == 0)
-                {
-                    return;
-                }
-            }
-
-            this.ProcessButton.IsEnabled = true;
-            this.DropBoxBlock.Text = file.Name;
+            this.ResultBlockLabel.Text = "Result: Error (see report)";
+            this.ResultBlock.Background = Brushes.LightCoral;
         }
+        else
+        {
+            this.ResultBlockLabel.Text = "Result: OK but see report";
+            this.ResultBlock.Background = Brushes.LightYellow;
+        }
+        
+        await cts.CancelAsync();
+
+        this.ProcessButton.Content = processText;
+        this.IsEnabled = true;
+        
+        this.ResultBlock.Opacity = 1;
     }
     
     private async Task AnimateButtonText(Button button, string text, CancellationToken token)

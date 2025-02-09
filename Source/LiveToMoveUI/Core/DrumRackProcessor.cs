@@ -9,8 +9,10 @@ using System.Collections.Generic;
 
 namespace LiveToMoveUI.Core;
 
-public abstract class DrumRack
+public abstract class DrumRackProcessor
 {
+    // TODO: insert all strings as a constants
+    
     #region Nested classes
     
     /// <summary>
@@ -34,6 +36,17 @@ public abstract class DrumRack
     
     #endregion
     
+    #region Enums
+
+    public enum ProcessingResult
+    {
+        Ok,
+        GenericError,
+        SamplesNotFound
+    }
+    
+    #endregion
+    
     #region Constants
     
     private const string DEFAULT_ADG_TARGET_DIR = "Processed";
@@ -42,32 +55,35 @@ public abstract class DrumRack
     
     #endregion
     
-    public static void Process(List<string> sourceFiles)
+    public static Dictionary<string, ProcessingResult> Process(List<string> sourceFiles)
     {
+        var result = new Dictionary<string, ProcessingResult>();
+        
         var xmlSourceTemplate = XDocument.Load(DEFAULT_TEMPLATE_FILE_NAME);
         
         foreach (var sourceFile in sourceFiles)
         {
             var xmlTemplateCopy = new XDocument(xmlSourceTemplate);
             
-            _ = DrumRack.ProcessInternal(sourceFile, xmlTemplateCopy, out var errorMessage);
+            result.Add(sourceFile, DrumRackProcessor.ProcessInternal(sourceFile, xmlTemplateCopy));
         }
+
+        return result;
     }
 
-    private static bool ProcessInternal(string sourceFile, XDocument xmlTemplate, out string errorMessage)
+    private static ProcessingResult ProcessInternal(string sourceFile, XDocument xmlTemplate)
     {
-        errorMessage = default;
         List<DrumSample> drumSampleList;
 
         if (string.IsNullOrEmpty(sourceFile) || xmlTemplate == null)
         {
-            return false;
+            return ProcessingResult.GenericError;
         }
         
         try
         {
             // Check if the ADG file is compressed (GZIP)
-            if (DrumRack.IsGZipFile(sourceFile))
+            if (DrumRackProcessor.IsGZipFile(sourceFile))
             {
                 Console.WriteLine("The file is compressed. Extracting in memory...");
 
@@ -75,7 +91,7 @@ public abstract class DrumRack
                 using var fs = new FileStream(sourceFile, FileMode.Open, FileAccess.Read);
                 using var gZipStream = new GZipStream(fs, CompressionMode.Decompress);
 
-                drumSampleList = DrumRack.ExtractDrumSamplesFromAdgStream(gZipStream);
+                drumSampleList = DrumRackProcessor.ExtractDrumSamplesFromAdgStream(gZipStream);
             }
             else
             {
@@ -83,21 +99,21 @@ public abstract class DrumRack
                 Console.WriteLine("The file is not compressed. Processing as XML...");
 
                 using var xmlFileStream = new FileStream(sourceFile, FileMode.Open, FileAccess.Read);
-                drumSampleList = DrumRack.ExtractDrumSamplesFromAdgStream(xmlFileStream);
+                drumSampleList = DrumRackProcessor.ExtractDrumSamplesFromAdgStream(xmlFileStream);
             }
         }
         catch (Exception ex)
         {
             Console.WriteLine("An error occurred: " + ex.Message);
 
-            return false;
+            return ProcessingResult.GenericError;
         }
 
         if ((drumSampleList?.Count ?? 0) <= 0)
         {
             Console.WriteLine($"No drum samples found on {Path.GetFileName(sourceFile)}");
             
-            return false;
+            return ProcessingResult.SamplesNotFound;
         }
 
         var drumBranchPresetList = xmlTemplate.Descendants("DrumBranchPreset");
@@ -106,19 +122,19 @@ public abstract class DrumRack
             var presetId = drumBranchPreset.Attribute("Id")?.Value;
             if (presetId == null)
             {
-                return false;
+                return ProcessingResult.GenericError;
             }
 
             var drumSample = drumSampleList.FirstOrDefault(p => p.Id == presetId);
             if (drumSample == null)
             {
-                return false;
+                return ProcessingResult.GenericError;
             }
 
             var userSample = drumBranchPreset.Descendants("UserSample").FirstOrDefault();
             if (userSample == null)
             {
-                return false;
+                return ProcessingResult.GenericError;
             }
 
             // Injecting the data of the sample into the userSample element
@@ -126,7 +142,7 @@ public abstract class DrumRack
 
             if (string.IsNullOrEmpty(drumSample.ReceivingNote))
             {
-                return false;
+                return ProcessingResult.GenericError;
             }
 
             var zoneSettings = drumBranchPreset.Element("ZoneSettings");
@@ -162,10 +178,10 @@ public abstract class DrumRack
         {
             Console.WriteLine("An error occurred: " + ex.Message);
 
-            return false;
+            return ProcessingResult.GenericError;
         }
         
-        return true;
+        return ProcessingResult.Ok;
     }
 
     /// <summary>

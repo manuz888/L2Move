@@ -5,38 +5,56 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="LiveToMoveUI.Views.MainWindow"
         Title="LiveToMoveUI"
-        Width="220" Height="400"
-        CanResize="False">
+        Width="220" Height="375"
+        CanResize="False"
+        DragDrop.AllowDrop="True">
     
     <StackPanel Background="Black" Margin="10,0,10,0" Spacing="0">
-        <TextBlock TextAlignment="Left"
-                   FontSize="30"
-                   Margin="0">
-            L2Move
-        </TextBlock>
-        <TextBlock TextAlignment="Left"
-                   FontSize="20"
-                   Margin="0,-12,0,0">
-            >Drum
-        </TextBlock>
+        <Grid ColumnDefinitions="Auto,*,Auto">
+            <TextBlock Grid.Column="0" TextAlignment="Left"
+                       FontSize="30"
+                       Margin="0">
+                L2Move
+            </TextBlock>
+            <TextBlock Grid.Column="0" TextAlignment="Left"
+                        FontSize="20"
+                        Margin="0,30,0,0">
+                >Drum
+            </TextBlock>
+            <TextBlock Grid.Column="1" TextAlignment="Right"
+                       FontSize="10"
+                       Margin="0,8,0,0">
+                >Credits
+                <ToolTip.Tip>
+                    <StackPanel>
+                        <TextBlock TextAlignment="Left" FontSize="11">
+                            Development: Manuele Nerucci<LineBreak/>
+                            Font: Val Kalinic (see exfont.com)
+                        </TextBlock>
+                    </StackPanel>
+                </ToolTip.Tip>
+            </TextBlock>
+        </Grid>
         
-        <Border Width="200" Height="200"
+        <Border Margin="0,10,0,0"
+                Width="200" Height="200"
                 Background="Transparent"
-                BorderBrush="White" BorderThickness="2" CornerRadius="5"
-                Margin="0,18,0,0"
-                DragDrop.AllowDrop="True">
+                BorderBrush="White" BorderThickness="2" CornerRadius="5">
             <TextBlock Name="DropBoxBlock" HorizontalAlignment="Center" VerticalAlignment="Center"
                        TextAlignment="Center" TextWrapping="Wrap"
                        FontSize="12">
-                Drop here or paste<LineBreak/>a drum rack .adg file<LineBreak/>or a directory with them
+                Drop here or paste<LineBreak/>
+                a drum rack .adg file<LineBreak/>
+                or a directory with them
             </TextBlock>
         </Border>
 
-        <TextBlock Name="ResultBlock" Margin="0,15,0,15" 
-                   Background="LightGreen" Foreground="Black" 
-                   TextAlignment="Center" VerticalAlignment="Center">
-            Result: OK
-        </TextBlock>
+        <Border Name="ResultBlock" Margin="0,5,0,5" CornerRadius="5" Height="25">
+            <TextBlock Name="ResultBlockLabel"
+                       Foreground="Black"  FontSize="11"
+                       TextAlignment="Center" VerticalAlignment="Center">
+            </TextBlock>
+        </Border>
         
         <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,5">
             <!-- Using Border to override the height of the Checkbox template -->
@@ -46,11 +64,6 @@
             <TextBlock Grid.Column="2" VerticalAlignment="Center" FontSize="11">
                 Generate report after processing
             </TextBlock>
-            <!-- <ToolTip.Tip> -->
-            <!--     <StackPanel> -->
-            <!--         <TextBlock>Some explanation here.</TextBlock> -->
-            <!--     </StackPanel> -->
-            <!-- </ToolTip.Tip> -->
         </Grid>
         
         <Button Name="ProcessButton"
