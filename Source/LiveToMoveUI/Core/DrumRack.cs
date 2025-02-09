@@ -1,8 +1,8 @@
 using System;
 using System.IO;
+using System.Xml;
 using System.Linq;
 using System.Text;
-using System.Xml;
 using System.Xml.Linq;
 using System.IO.Compression;
 using System.Collections.Generic;
@@ -44,88 +44,107 @@ public abstract class DrumRack
     
     public static void Process(List<string> sourceFiles)
     {
+        var xmlSourceTemplate = XDocument.Load(DEFAULT_TEMPLATE_FILE_NAME);
+        
         foreach (var sourceFile in sourceFiles)
         {
-            var xmlTemplate = XDocument.Load(DEFAULT_TEMPLATE_FILE_NAME);
-            List<DrumSample> drumSampleList = null;
+            var xmlTemplateCopy = new XDocument(xmlSourceTemplate);
             
-            try
+            _ = DrumRack.ProcessInternal(sourceFile, xmlTemplateCopy, out var errorMessage);
+        }
+    }
+
+    private static bool ProcessInternal(string sourceFile, XDocument xmlTemplate, out string errorMessage)
+    {
+        errorMessage = default;
+        List<DrumSample> drumSampleList;
+
+        if (string.IsNullOrEmpty(sourceFile) || xmlTemplate == null)
+        {
+            return false;
+        }
+        
+        try
+        {
+            // Check if the ADG file is compressed (GZIP)
+            if (DrumRack.IsGZipFile(sourceFile))
             {
-                // Check if the ADG file is compressed (GZIP)
-                if (DrumRack.IsGZipFile(sourceFile))
-                {
-                    Console.WriteLine("The file is compressed. Extracting in memory...");
+                Console.WriteLine("The file is compressed. Extracting in memory...");
 
-                    // Open the ADG file as a FileStream and process it as a ZIP archive in memory
-                    using FileStream fs = new FileStream(sourceFile, FileMode.Open, FileAccess.Read);
-                    using GZipStream gZipStream = new GZipStream(fs, CompressionMode.Decompress);
+                // Open the ADG file as a FileStream and process it as a ZIP archive in memory
+                using var fs = new FileStream(sourceFile, FileMode.Open, FileAccess.Read);
+                using var gZipStream = new GZipStream(fs, CompressionMode.Decompress);
 
-                    drumSampleList = ExtractDrumSamplesFromAdgStream(gZipStream);
-                }
-                else
-                {
-                    // If not compressed, assume the file is an XML file
-                    Console.WriteLine("The file is not compressed. Processing as XML...");
-
-                    using FileStream xmlFileStream = new FileStream(sourceFile, FileMode.Open, FileAccess.Read);
-                    drumSampleList = ExtractDrumSamplesFromAdgStream(xmlFileStream);
-                }
+                drumSampleList = DrumRack.ExtractDrumSamplesFromAdgStream(gZipStream);
             }
-            catch (Exception ex)
+            else
             {
-                Console.WriteLine("An error occurred: " + ex.Message);
+                // If not compressed, assume the file is an XML file
+                Console.WriteLine("The file is not compressed. Processing as XML...");
+
+                using var xmlFileStream = new FileStream(sourceFile, FileMode.Open, FileAccess.Read);
+                drumSampleList = DrumRack.ExtractDrumSamplesFromAdgStream(xmlFileStream);
             }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: " + ex.Message);
 
-            if (drumSampleList?.Count <= 0)
+            return false;
+        }
+
+        if ((drumSampleList?.Count ?? 0) <= 0)
+        {
+            Console.WriteLine($"No drum samples found on {Path.GetFileName(sourceFile)}");
+            
+            return false;
+        }
+
+        var drumBranchPresetList = xmlTemplate.Descendants("DrumBranchPreset");
+        foreach (var drumBranchPreset in drumBranchPresetList)
+        {
+            var presetId = drumBranchPreset.Attribute("Id")?.Value;
+            if (presetId == null)
             {
-                Console.WriteLine($"No drum samples found on {Path.GetFileName(sourceFile)}");
-                
-                continue;
-            }
-
-            var drumBranchPresetList = xmlTemplate.Descendants("DrumBranchPreset");
-            foreach (var drumBranchPreset in drumBranchPresetList)
-            {
-                var presetId = drumBranchPreset.Attribute("Id")?.Value;
-                if (presetId == null)
-                {
-                    continue;
-                }
-
-                var drumSample = drumSampleList.FirstOrDefault(p => p.Id == presetId);
-                if (drumSample == null)
-                {
-                    continue;
-                }
-
-                var userSample = drumBranchPreset.Descendants("UserSample").FirstOrDefault();
-                if (userSample == null)
-                {
-                    continue;
-                }
-
-                // Injecting the data of the sample into the userSample element
-                userSample.Element("Value")?.Add(drumSample.Body);
-
-                if (string.IsNullOrEmpty(drumSample.ReceivingNote))
-                {
-                    continue;
-                }
-
-                var zoneSettings = drumBranchPreset.Element("ZoneSettings");
-                var receivingNote = zoneSettings?.Element("ReceivingNote");
-
-                receivingNote?.SetAttributeValue("Value", drumSample.ReceivingNote);
+                return false;
             }
 
-            var settings = new XmlWriterSettings
+            var drumSample = drumSampleList.FirstOrDefault(p => p.Id == presetId);
+            if (drumSample == null)
             {
-                Indent = true, // Enable indent
-                IndentChars = "\t", // Use TAB as an indent char
-                Encoding = new UTF8Encoding(false), // Avoiding BOM (Byte Order Mark)
-                OmitXmlDeclaration = false // To use the XML declaration
-            };
+                return false;
+            }
 
+            var userSample = drumBranchPreset.Descendants("UserSample").FirstOrDefault();
+            if (userSample == null)
+            {
+                return false;
+            }
+
+            // Injecting the data of the sample into the userSample element
+            userSample.Element("Value")?.Add(drumSample.Body);
+
+            if (string.IsNullOrEmpty(drumSample.ReceivingNote))
+            {
+                return false;
+            }
+
+            var zoneSettings = drumBranchPreset.Element("ZoneSettings");
+            var receivingNote = zoneSettings?.Element("ReceivingNote");
+
+            receivingNote?.SetAttributeValue("Value", drumSample.ReceivingNote);
+        }
+
+        var settings = new XmlWriterSettings
+        {
+            Indent = true, // Enable indent
+            IndentChars = "\t", // Use TAB as an indent char
+            Encoding = new UTF8Encoding(false), // Avoiding BOM (Byte Order Mark)
+            OmitXmlDeclaration = false // To use the XML declaration
+        };
+
+        try
+        {
             var processedPath = Path.Combine(Path.GetDirectoryName(sourceFile), DEFAULT_ADG_TARGET_DIR);
             if (!Directory.Exists(processedPath))
             {
@@ -134,13 +153,19 @@ public abstract class DrumRack
 
             processedPath = Path.Combine(processedPath, Path.GetFileName(sourceFile));
 
-            using (var fileStream = new FileStream(processedPath, FileMode.Create, FileAccess.Write))
-            using (var gzipStream = new GZipStream(fileStream, CompressionMode.Compress))
-            using (var writer = XmlWriter.Create(gzipStream, settings))
-            {
-                xmlTemplate.Save(writer);
-            }
+            using var fileStream = new FileStream(processedPath, FileMode.Create, FileAccess.Write);
+            using var gzipStream = new GZipStream(fileStream, CompressionMode.Compress);
+            using var writer = XmlWriter.Create(gzipStream, settings);
+            xmlTemplate.Save(writer);
         }
+        catch (Exception ex)
+        {
+            Console.WriteLine("An error occurred: " + ex.Message);
+
+            return false;
+        }
+        
+        return true;
     }
 
     /// <summary>

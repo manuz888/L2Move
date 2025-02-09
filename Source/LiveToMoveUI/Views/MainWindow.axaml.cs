@@ -15,15 +15,17 @@ namespace LiveToMoveUI.Views;
 public partial class MainWindow : Window
 {
     private string _dropBoxLabelText;
-    public List<string> _sourcePathList;
+    private List<string> _sourcePathList;
     
     public MainWindow()
     {
         InitializeComponent();
 
-        _dropBoxLabelText = this.DropBoxBlock.Text;
+        _dropBoxLabelText = this.DropBoxBlock?.Text ?? string.Empty;
 
         this.ResultBlock.Opacity = 0;
+        
+        this.ProcessButton.IsEnabled = false;
         this.ProcessButton.Click += this.OnProcessClicked;
         
         this.AddHandler(DragDrop.DropEvent, this.OnDrop);
@@ -88,7 +90,8 @@ public partial class MainWindow : Window
                     return;
                 }
             }
-            
+
+            this.ProcessButton.IsEnabled = true;
             this.DropBoxBlock.Text = file.Name;
         }
     }

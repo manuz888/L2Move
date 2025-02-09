@@ -5,19 +5,19 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="LiveToMoveUI.Views.MainWindow"
         Title="LiveToMoveUI"
-        Width="220" Height="410"
+        Width="220" Height="400"
         CanResize="False">
     
     <StackPanel Background="Black" Margin="10,0,10,0" Spacing="0">
         <TextBlock TextAlignment="Left"
-                   FontSize="45"
-                   Margin="0,-10,0,0">
+                   FontSize="30"
+                   Margin="0">
             L2Move
         </TextBlock>
         <TextBlock TextAlignment="Left"
                    FontSize="20"
                    Margin="0,-12,0,0">
-            ::Drum
+            >Drum
         </TextBlock>
         
         <Border Width="200" Height="200"
@@ -46,16 +46,14 @@
             <TextBlock Grid.Column="2" VerticalAlignment="Center" FontSize="11">
                 Generate report after processing
             </TextBlock>
-            <ToolTip.Tip>
-                <StackPanel>
-                    <TextBlock>Some explanation here.</TextBlock>
-                </StackPanel>
-            </ToolTip.Tip>
+            <!-- <ToolTip.Tip> -->
+            <!--     <StackPanel> -->
+            <!--         <TextBlock>Some explanation here.</TextBlock> -->
+            <!--     </StackPanel> -->
+            <!-- </ToolTip.Tip> -->
         </Grid>
         
         <Button Name="ProcessButton"
-                HorizontalAlignment="Center"
-                HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
                 Content="Start process"
                 Width="200" Height="35">
         </Button>
