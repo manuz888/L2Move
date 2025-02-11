@@ -41,7 +41,7 @@
                 Background="Transparent"
                 BorderBrush="White" BorderThickness="2" CornerRadius="5">
             <TextBlock Name="DropBoxBlock" HorizontalAlignment="Center" VerticalAlignment="Center"
-                       TextAlignment="Center" TextWrapping="Wrap"
+                       TextAlignment="Center" TextWrapping="Wrap" Padding="5"
                        FontSize="12">
                 Drop here or paste<LineBreak/>
                 a drum rack .adg file<LineBreak/>

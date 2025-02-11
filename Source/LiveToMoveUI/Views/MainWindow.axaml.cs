@@ -33,14 +33,23 @@ public partial class MainWindow : Window
     
     private async void OnKeyDown(object? sender, KeyEventArgs e)
     {
-        // TODO: doesn't work on macos
-        if ((e.KeyModifiers.HasFlag(KeyModifiers.Control) || e.KeyModifiers.HasFlag(KeyModifiers.Meta)) && 
-             e.Key == Key.V)
+        if (this.Clipboard == null)
         {
-            if (this.Clipboard != null)
-            {
-                var text = await this.Clipboard.GetTextAsync();
-            }
+            return;
+        }
+        
+        var isPasteCommand = (e.KeyModifiers.HasFlag(KeyModifiers.Control) || e.KeyModifiers.HasFlag(KeyModifiers.Meta)) && 
+                              e.Key == Key.V;
+        if (!isPasteCommand)
+        {
+            return;
+        }
+
+        var path = await this.Clipboard.GetDataAsync(DataFormats.FileNames);
+
+        if (path is string[] { Length: > 0 } stringPath)
+        {
+            this.HandlePath(stringPath[0]);
         }
     }
     
@@ -51,7 +60,7 @@ public partial class MainWindow : Window
         // To prevent the drag
         eventArgs.DragEffects = DragDropEffects.None;
 
-        if (!Helpers.GetLocalPathFromDragEvent(eventArgs, out var localPath))
+        if (!Helpers.GetPathFromDragEvent(eventArgs, out var localPath))
         {
             return;
         }
@@ -65,31 +74,12 @@ public partial class MainWindow : Window
     
     private void OnDrop(object? sender, DragEventArgs eventArgs)
     {
-        if (!Helpers.GetLocalPathFromDragEvent(eventArgs, out var localPath))
+        if (!Helpers.GetPathFromDragEvent(eventArgs, out var path))
         {
             return;
         }
 
-        var prefix = string.Empty;
-        if (File.Exists(localPath))
-        {
-            prefix = "File:";
-            
-            _sourcePathList = [localPath];
-        }
-        else if (Directory.Exists(localPath))
-        {
-            prefix = "Directory:";
-            
-            Helpers.GetFilesFromPathByExtension(".adg", localPath, out _sourcePathList);
-        }
-        else
-        {
-            // TODO: manage error
-        }
-
-        this.ProcessButton.IsEnabled = true;
-        this.DropBoxBlock.Text = $"{prefix} {Path.GetFileName(localPath)}";
+        this.HandlePath(path);
     }
 
     private async void OnProcessClicked(object? sender, RoutedEventArgs e)
@@ -127,6 +117,36 @@ public partial class MainWindow : Window
         
         this.IsEnabled = true;
         this.ResultBlock.Opacity = 1;
+    }
+
+    private void HandlePath(string path)
+    {
+        if (string.IsNullOrEmpty(path))
+        {
+            return;
+        }
+        
+        var prefix = ">";
+        if (File.Exists(path))
+        {
+            prefix += "File:";
+            
+            _sourcePathList = [path];
+        }
+        else if (Directory.Exists(path))
+        {
+            prefix += "Directory:";
+            
+            Helpers.GetFilesFromPathByExtension(".adg", path, out _sourcePathList);
+        }
+        else
+        {
+            // Invalid path
+            return;
+        }
+        
+        this.ProcessButton.IsEnabled = true;
+        this.DropBoxBlock.Text = $"{prefix}\n{Path.GetFileName(path)}";
     }
     
     private async Task AnimateButtonText(Button button, string text, CancellationToken token)

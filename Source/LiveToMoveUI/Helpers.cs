@@ -20,9 +20,9 @@ public static class Helpers
         return fileList.Count > 0;
     }
 
-    public static bool GetLocalPathFromDragEvent(DragEventArgs eventArgs, out string localPath)
+    public static bool GetPathFromDragEvent(DragEventArgs eventArgs, out string path)
     {
-        localPath = default;
+        path = default;
         
         if (!eventArgs.Data.Contains(DataFormats.Files))
         {
@@ -40,7 +40,7 @@ public static class Helpers
             return false;
         }
         
-        localPath = storageItem.Path.LocalPath;
+        path = storageItem.Path.LocalPath;
         
         return true;
     }
