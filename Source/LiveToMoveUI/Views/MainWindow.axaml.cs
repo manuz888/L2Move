@@ -1,5 +1,4 @@
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
@@ -8,6 +7,7 @@ using Avalonia.Input;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Media;
+
 using LiveToMoveUI.Core;
 
 namespace LiveToMoveUI.Views;
@@ -24,9 +24,24 @@ public partial class MainWindow : Window
         
         this.ProcessButton.IsEnabled = false;
         this.ProcessButton.Click += this.OnProcessClicked;
+    
+        this.AddHandler(KeyDownEvent, this.OnKeyDown);
         
         this.AddHandler(DragDrop.DragOverEvent, this.OnDragOver);
         this.AddHandler(DragDrop.DropEvent, this.OnDrop);
+    }
+    
+    private async void OnKeyDown(object? sender, KeyEventArgs e)
+    {
+        // TODO: doesn't work on macos
+        if ((e.KeyModifiers.HasFlag(KeyModifiers.Control) || e.KeyModifiers.HasFlag(KeyModifiers.Meta)) && 
+             e.Key == Key.V)
+        {
+            if (this.Clipboard != null)
+            {
+                var text = await this.Clipboard.GetTextAsync();
+            }
+        }
     }
     
     private void OnDragOver(object? sender, DragEventArgs eventArgs)
@@ -79,11 +94,9 @@ public partial class MainWindow : Window
 
     private async void OnProcessClicked(object? sender, RoutedEventArgs e)
     {
-        var processText = this.ProcessButton.Content;
-        this.IsEnabled = false;
-
-        var cts = new CancellationTokenSource();
-        _ = this.AnimateButtonText(this.ProcessButton, "Processing", cts.Token);
+        var processButtonLabel = this.ProcessButton.Content;
+        var animatedCts = new CancellationTokenSource();
+        _ = this.AnimateButtonText(this.ProcessButton, "Processing", animatedCts.Token);
         
         var result = DrumRackProcessor.Process(_sourcePathList);
         
@@ -109,24 +122,22 @@ public partial class MainWindow : Window
             this.ResultBlock.Background = Brushes.LightYellow;
         }
         
-        await cts.CancelAsync();
-
-        this.ProcessButton.Content = processText;
-        this.IsEnabled = true;
+        await animatedCts.CancelAsync();
+        this.ProcessButton.Content = processButtonLabel;
         
+        this.IsEnabled = true;
         this.ResultBlock.Opacity = 1;
     }
     
     private async Task AnimateButtonText(Button button, string text, CancellationToken token)
     {
-        var baseText = text;
-        string[] states = [".", "..", "..."];
+        string[] animatedStates = [".", "..", "..."];
+        
         var index = 0;
-
         while (!token.IsCancellationRequested)
         {
-            button.Content = baseText + states[index];
-            index = (index + 1) % states.Length;
+            button.Content = text + animatedStates[index];
+            index = (index + 1) % animatedStates.Length;
             
             await Task.Delay(250, token); 
         }
