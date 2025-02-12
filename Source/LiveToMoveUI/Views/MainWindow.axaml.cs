@@ -1,19 +1,25 @@
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 
 using Avalonia.Input;
+using Avalonia.Media;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Avalonia.Media;
 
 using LiveToMoveUI.Core;
+using LiveToMoveUI.Models;
 
 namespace LiveToMoveUI.Views;
 
 public partial class MainWindow : Window
 {
+    private const string DRUM_RACK_LIVE_EXTENSION = ".adg";
+    private const string TARGET_DIRECTORY = "Processed";
+    private const string REPORT_FILE_NAME = "report.txt";
+    
     private List<string> _sourcePathList;
     
     public MainWindow()
@@ -49,7 +55,7 @@ public partial class MainWindow : Window
 
         if (path is string[] { Length: > 0 } stringPath)
         {
-            this.HandlePath(stringPath[0]);
+            this.HandlePathToProcess(stringPath[0]);
         }
     }
     
@@ -66,7 +72,8 @@ public partial class MainWindow : Window
         }
         
         var extension = Path.GetExtension(localPath);
-        if (extension == ".adg" || (Directory.Exists(localPath) && Helpers.GetFilesFromPathByExtension(".adg", localPath, out _)))
+        if (extension == DRUM_RACK_LIVE_EXTENSION || 
+            (Directory.Exists(localPath) && Helpers.GetFilesFromPathByExtension(DRUM_RACK_LIVE_EXTENSION, localPath, out _)))
         {
             eventArgs.DragEffects = DragDropEffects.Copy;
         }
@@ -78,24 +85,28 @@ public partial class MainWindow : Window
         {
             return;
         }
-
-        this.HandlePath(path);
+        
+        this.HandlePathToProcess(path);
     }
 
     private async void OnProcessClicked(object? sender, RoutedEventArgs e)
     {
+        // Recheck for safe reason
+        if (_sourcePathList == null || _sourcePathList.Count <= 0)
+        {
+            // TODO: add a message error?
+            
+            return;
+        }
+        
         var processButtonLabel = this.ProcessButton.Content;
         var animatedCts = new CancellationTokenSource();
         _ = this.AnimateButtonText(this.ProcessButton, "Processing", animatedCts.Token);
         
-        var result = DrumRackProcessor.Process(_sourcePathList);
+        var targetPath = Path.Combine(Path.GetDirectoryName(_sourcePathList[0]), TARGET_DIRECTORY);
+        var result = DrumRackProcessor.Process(_sourcePathList, targetPath);
         
-        var successCount = 0;
-        foreach (var sourcePath in _sourcePathList)
-        {
-            successCount += result[sourcePath] == DrumRackProcessor.ProcessingResult.Ok ? 1 : 0;
-        }
-
+        var successCount = result.Count(_ => _.Value == ProcessingResult.ValueEnum.Ok);
         if (successCount == _sourcePathList.Count)
         {
             this.ResultBlockLabel.Text = "Result: OK";
@@ -112,6 +123,8 @@ public partial class MainWindow : Window
             this.ResultBlock.Background = Brushes.LightYellow;
         }
         
+        ReportGenerator.Generate(result, Path.Combine(targetPath, REPORT_FILE_NAME));
+        
         await animatedCts.CancelAsync();
         this.ProcessButton.Content = processButtonLabel;
         
@@ -119,7 +132,7 @@ public partial class MainWindow : Window
         this.ResultBlock.Opacity = 1;
     }
 
-    private void HandlePath(string path)
+    private void HandlePathToProcess(string path)
     {
         if (string.IsNullOrEmpty(path))
         {
@@ -137,7 +150,7 @@ public partial class MainWindow : Window
         {
             prefix += "Directory:";
             
-            Helpers.GetFilesFromPathByExtension(".adg", path, out _sourcePathList);
+            Helpers.GetFilesFromPathByExtension(DRUM_RACK_LIVE_EXTENSION, path, out _sourcePathList);
         }
         else
         {
@@ -145,7 +158,9 @@ public partial class MainWindow : Window
             return;
         }
         
+        this.ResultBlock.Opacity = 0;
         this.ProcessButton.IsEnabled = true;
+        
         this.DropBoxBlock.Text = $"{prefix}\n{Path.GetFileName(path)}";
     }
     
