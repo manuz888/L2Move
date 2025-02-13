@@ -85,50 +85,7 @@ public partial class MainWindow : Window
         
         this.HandlePathToProcess(path);
     }
-
-    private async void OnProcessClicked(object? sender, RoutedEventArgs e)
-    {
-        // Recheck for safe reason
-        if (_sourcePathList == null || _sourcePathList.Count <= 0)
-        {
-            // TODO: add a message error?
-            
-            return;
-        }
-        
-        var processButtonLabel = this.ProcessButton.Content;
-        var animatedCts = new CancellationTokenSource();
-        _ = this.AnimateButtonText(this.ProcessButton, "Processing", animatedCts.Token);
-        
-        var targetPath = Path.Combine(Path.GetDirectoryName(_sourcePathList[0]), TARGET_DIRECTORY);
-        var result = DrumRackProcessor.Process(_sourcePathList, targetPath);
-        
-        var successCount = result.Count(_ => _.Value == ProcessingResult.ValueEnum.Ok);
-        if (successCount == _sourcePathList.Count)
-        {
-            this.ResultBlockLabel.Text = "Result: OK";
-            this.ResultBlock.Background = Brushes.LightGreen;
-        }
-        else if (successCount == 0)
-        {
-            this.ResultBlockLabel.Text = "Result: Error (see report)";
-            this.ResultBlock.Background = Brushes.LightCoral;
-        }
-        else
-        {
-            this.ResultBlockLabel.Text = "Result: OK but see report";
-            this.ResultBlock.Background = Brushes.LightYellow;
-        }
-        
-        ReportGenerator.Generate(result, Path.Combine(targetPath, REPORT_FILE_NAME));
-        
-        await animatedCts.CancelAsync();
-        this.ProcessButton.Content = processButtonLabel;
-        
-        this.IsEnabled = true;
-        this.ResultBlock.Opacity = 1;
-    }
-
+    
     private void HandlePathToProcess(string path, bool checkExtension = false)
     {
         if (string.IsNullOrEmpty(path))
@@ -164,6 +121,54 @@ public partial class MainWindow : Window
         this.ProcessButton.IsEnabled = true;
         
         this.DropBoxBlock.Text = $"{prefix}\n{Path.GetFileName(path)}";
+    }
+
+    private async void OnProcessClicked(object? sender, RoutedEventArgs e)
+    {
+        // Recheck for safe reason
+        if (_sourcePathList == null || _sourcePathList.Count <= 0)
+        {
+            // TODO: add a message error?
+            
+            return;
+        }
+        
+        var processButtonLabel = this.ProcessButton.Content;
+        var animatedCts = new CancellationTokenSource();
+        _ = this.AnimateButtonText(this.ProcessButton, "Processing", animatedCts.Token);
+        
+        var targetPath = Path.Combine(Path.GetDirectoryName(_sourcePathList[0]), TARGET_DIRECTORY);
+        var result = DrumRackProcessor.Process(_sourcePathList, targetPath);
+        
+        ReportGenerator.Generate(result, Path.Combine(targetPath, REPORT_FILE_NAME));
+
+        if (this.PresetBundleCheckbox.IsChecked ?? false)
+        {
+            // TODO: ...
+        }
+        
+        var successCount = result.Count(_ => _.Value == ProcessingResult.ValueEnum.Ok);
+        if (successCount == _sourcePathList.Count)
+        {
+            this.ResultBlockLabel.Text = "Result: OK";
+            this.ResultBlock.Background = Brushes.LightGreen;
+        }
+        else if (successCount == 0)
+        {
+            this.ResultBlockLabel.Text = "Result: Error (see report)";
+            this.ResultBlock.Background = Brushes.LightCoral;
+        }
+        else
+        {
+            this.ResultBlockLabel.Text = "Result: OK but see report";
+            this.ResultBlock.Background = Brushes.LightYellow;
+        }
+        
+        await animatedCts.CancelAsync();
+        this.ProcessButton.Content = processButtonLabel;
+        
+        this.IsEnabled = true;
+        this.ResultBlock.Opacity = 1;
     }
     
     private async Task AnimateButtonText(Button button, string text, CancellationToken token)

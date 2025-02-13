@@ -22,16 +22,19 @@ public abstract class DrumRackProcessor
     /// </summary>
     private class DrumSample
     {
-        public DrumSample(string id, XElement body, string receivingNote)
+        public DrumSample(string id, XElement body, string receivingNote, string path)
         {
             this.Id = id;
             this.Body = body;
             this.ReceivingNote = receivingNote;
+            this.Path = path;
         }
 
         public string Id { get; }
         
         public XElement Body { get; }
+        
+        public string Path { get; }
         
         public string ReceivingNote { get; }
     }
@@ -170,6 +173,9 @@ public abstract class DrumRackProcessor
 
             return processingResult.SetValue(ProcessingResult.ValueEnum.GenericError);
         }
+
+        processingResult.Value = ProcessingResult.ValueEnum.Ok;
+        processingResult.
         
         return processingResult.SetValue(ProcessingResult.ValueEnum.Ok);
     }
@@ -216,12 +222,18 @@ public abstract class DrumRackProcessor
                 // Look for FileRef under the SampleRef element
                 if (sampleRefElement?.Element("FileRef") == null)
                 {
+                    // TODO: notify error
+                    
                     continue;
                 }
                 
-                var zoneSettings = drumBranchPreset.Element("ZoneSettings");
-                var receivingNote = zoneSettings?.Element("ReceivingNote");
-                var receivingNoteValue = receivingNote?.Attribute("Value")?.Value;
+                var receivingNote = drumBranchPreset.Element("ZoneSettings")
+                    ?.Element("ReceivingNote")
+                    ?.Attribute("Value")?.Value;
+
+                var path = sampleRefElement.Element("FileRef")
+                    ?.Element("Path")
+                    ?.Attribute("Value")?.Value;
 
                 // Add the default id for safe
                 sampleRefElement.SetAttributeValue("Id", 0);
@@ -230,7 +242,7 @@ public abstract class DrumRackProcessor
                 sampleRefElement.Descendants("SourceContext").Remove();
                 sampleRefElement.Add(new XElement("SourceContext"));
 
-                drumSampleList.Add(new DrumSample(drumBranchId, sampleRefElement, receivingNoteValue));
+                drumSampleList.Add(new DrumSample(drumBranchId, sampleRefElement, receivingNote, path));
             }
 
             return drumSampleList;

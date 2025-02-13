@@ -4,11 +4,11 @@ using Newtonsoft.Json;
 
 namespace LiveToMoveUI.Models.Json;
 
-public sealed class DrumRackPreset
+public sealed class MovePreset
 {
     #region Nested classes
     
-    public class Parameters
+    public class Params
     {
         public bool Enabled { get; set; } = true;
         public double Macro0 { get; set; } = 0.0;
@@ -51,17 +51,35 @@ public sealed class DrumRackPreset
         
         public string Name { get; set; } = "";
         
-        public Parameters Parameters { get; set; }
+        public Params Params { get; set; }
         
         public List<Chain> Chains { get; set; }
         
+        public List<Chain> ReturnChains { get; set; }
+        
         public DeviceData DeviceData { get; set; }
+
+        public static Device DrumRack(List<Chain> drumCells) => new Device()
+        {
+            Kind = "drumRack",
+            Chains = drumCells,
+            ReturnChains = [MovePreset.Chain.ReverbReturnChain()]
+        };
+        
+        public static Device DrumCell(string samplePath) => new Device()
+        {
+            Kind = "drumCell",
+            DeviceData = new MovePreset.DeviceData
+            {
+                SampleUri = samplePath
+            }
+        };
         
         public static Device Reverb() => new Device
         {
             Kind = "reverb",
             Name = "Reverb",
-            Parameters = new Parameters(),
+            Params = new Params(),
             DeviceData = new DeviceData()
         };
         
@@ -69,7 +87,7 @@ public sealed class DrumRackPreset
         {
             Kind = "saturator",
             Name = "Saturator",
-            Parameters = new Parameters(),
+            Params = new Params(),
             DeviceData = new DeviceData()
         };
     }
@@ -115,7 +133,7 @@ public sealed class DrumRackPreset
     }
     
     #endregion
-    
+
     [JsonProperty("$schema")]
     public string Schema { get; set; } = "http://tech.ableton.com/schema/song/1.4.4/devicePreset.json";
 
@@ -123,8 +141,7 @@ public sealed class DrumRackPreset
     
     public string Name { get; set; }
     
-    [JsonProperty("parameters")]
-    public Parameters Params { get; set; } = new Parameters();
+    public Params Parameters { get; set; } = new();
     
     public List<Chain> Chains { get; set; }
 }

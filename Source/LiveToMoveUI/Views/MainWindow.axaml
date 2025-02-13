@@ -4,7 +4,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="LiveToMoveUI.Views.MainWindow"
-        Title="L2Move >Drum"
+        Title="L2Move > Drum"
         Width="220" Height="375"
         CanResize="False"
         DragDrop.AllowDrop="True">
@@ -19,12 +19,12 @@
             <TextBlock Grid.Column="0" TextAlignment="Left"
                         FontSize="20"
                         Margin="0,30,0,0">
-                >Drum
+                > Drum
             </TextBlock>
             <TextBlock Grid.Column="1" TextAlignment="Right"
                        FontSize="10"
                        Margin="0,8,0,0">
-                >Credits
+                > Credits
                 <ToolTip.Tip>
                     <StackPanel>
                         <TextBlock TextAlignment="Left" FontSize="11">
@@ -59,10 +59,10 @@
         <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,5">
             <!-- Using Border to override the height of the Checkbox template -->
             <Border Grid.Column="0" Height="20">
-                <CheckBox IsChecked="False"/>
+                <CheckBox Name="PresetBundleCheckbox" IsChecked="False"/>
             </Border>
             <TextBlock Grid.Column="2" VerticalAlignment="Center" FontSize="11">
-                Generate report after processing
+                Generate preset bundle for Move
             </TextBlock>
         </Grid>
         

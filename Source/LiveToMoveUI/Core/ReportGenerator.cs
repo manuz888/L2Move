@@ -10,17 +10,6 @@ namespace LiveToMoveUI.Core;
 
 public abstract class ReportGenerator
 {
-    #region Nested classes
-    
-    public abstract class Result
-    {
-        public string FileName { get; set; }
-        
-        public string Status { get; set; }
-    }
-    
-    #endregion
-    
     #region Constants
 
     private const string FILE_NAME_COLUMN = "File Name";
