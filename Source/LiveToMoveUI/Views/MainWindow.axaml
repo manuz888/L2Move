@@ -28,7 +28,7 @@
                 <ToolTip.Tip>
                     <StackPanel>
                         <TextBlock TextAlignment="Left" FontSize="11">
-                            Development: Manuele Nerucci<LineBreak/>
+                            Dev: Manuele Nerucci (nerucci.manuele@gmail.com)<LineBreak/>
                             Font: Val Kalinic (see exfont.com)
                         </TextBlock>
                     </StackPanel>

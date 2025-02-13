@@ -33,8 +33,8 @@ public sealed class ProcessingResult
     public string ValueString => this.Value switch
     {
         ValueEnum.Ok => "Ok",
-        ValueEnum.GenericError => "Generic Error",
-        ValueEnum.SamplesNotFound => "Samples Not Found",
+        ValueEnum.GenericError => "Generic error",
+        ValueEnum.SamplesNotFound => "Samples not Found",
         
         _ => throw new ArgumentOutOfRangeException()
     };

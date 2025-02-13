@@ -44,4 +44,19 @@ public static class Helpers
         
         return true;
     }
+
+    public static bool ContainsFilesWithExtension(string path, string extension)
+    {
+        if (string.IsNullOrEmpty(path))
+        {
+            return false;
+        }
+        
+        if (extension == Path.GetExtension(path))
+        {
+            return true;
+        }
+       
+        return Directory.Exists(path) && Helpers.GetFilesFromPathByExtension(extension, path, out _);
+    }
 }

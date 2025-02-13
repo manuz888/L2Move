@@ -52,10 +52,9 @@ public partial class MainWindow : Window
         }
 
         var path = await this.Clipboard.GetDataAsync(DataFormats.FileNames);
-
         if (path is string[] { Length: > 0 } stringPath)
         {
-            this.HandlePathToProcess(stringPath[0]);
+            this.HandlePathToProcess(stringPath[0], checkExtension: true);
         }
     }
     
@@ -70,10 +69,8 @@ public partial class MainWindow : Window
         {
             return;
         }
-        
-        var extension = Path.GetExtension(localPath);
-        if (extension == DRUM_RACK_LIVE_EXTENSION || 
-            (Directory.Exists(localPath) && Helpers.GetFilesFromPathByExtension(DRUM_RACK_LIVE_EXTENSION, localPath, out _)))
+
+        if (Helpers.ContainsFilesWithExtension(localPath, DRUM_RACK_LIVE_EXTENSION))
         {
             eventArgs.DragEffects = DragDropEffects.Copy;
         }
@@ -132,9 +129,14 @@ public partial class MainWindow : Window
         this.ResultBlock.Opacity = 1;
     }
 
-    private void HandlePathToProcess(string path)
+    private void HandlePathToProcess(string path, bool checkExtension = false)
     {
         if (string.IsNullOrEmpty(path))
+        {
+            return;
+        }
+
+        if (checkExtension && !Helpers.ContainsFilesWithExtension(path, DRUM_RACK_LIVE_EXTENSION))
         {
             return;
         }
