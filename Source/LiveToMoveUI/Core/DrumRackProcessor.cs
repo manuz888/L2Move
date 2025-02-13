@@ -68,10 +68,10 @@ public abstract class DrumRackProcessor
     {
         List<DrumSample> drumSampleList;
 
-        var processingResult = new ProcessingResult() { Path = sourcePath };
+        var processingResult = new ProcessingResult(sourcePath);
         if (string.IsNullOrEmpty(sourcePath) || string.IsNullOrEmpty(targetPath) || xmlTemplate == null)
         {
-            return processingResult.SetValue(ProcessingResult.ValueEnum.GenericError);
+            return processingResult.Set(ProcessingResult.ValueEnum.GenericError);
         }
         
         try
@@ -100,14 +100,14 @@ public abstract class DrumRackProcessor
         {
             Console.WriteLine("An error occurred: " + ex.Message);
 
-            return processingResult.SetValue(ProcessingResult.ValueEnum.GenericError);
+            return processingResult.Set(ProcessingResult.ValueEnum.GenericError);
         }
 
         if ((drumSampleList?.Count ?? 0) <= 0)
         {
             Console.WriteLine($"No drum samples found on {Path.GetFileName(sourcePath)}");
             
-            return processingResult.SetValue(ProcessingResult.ValueEnum.SamplesNotFound);
+            return processingResult.Set(ProcessingResult.ValueEnum.SamplesNotFound);
         }
 
         var drumBranchPresetList = xmlTemplate.Descendants("DrumBranchPreset");
@@ -116,19 +116,19 @@ public abstract class DrumRackProcessor
             var presetId = drumBranchPreset.Attribute("Id")?.Value;
             if (presetId == null)
             {
-                return processingResult.SetValue(ProcessingResult.ValueEnum.GenericError);
+                return processingResult.Set(ProcessingResult.ValueEnum.GenericError);
             }
 
             var drumSample = drumSampleList.FirstOrDefault(p => p.Id == presetId);
             if (drumSample == null)
             {
-                return processingResult.SetValue(ProcessingResult.ValueEnum.GenericError);
+                return processingResult.Set(ProcessingResult.ValueEnum.GenericError);
             }
 
             var userSample = drumBranchPreset.Descendants("UserSample").FirstOrDefault();
             if (userSample == null)
             {
-                return processingResult.SetValue(ProcessingResult.ValueEnum.GenericError);
+                return processingResult.Set(ProcessingResult.ValueEnum.GenericError);
             }
 
             // Injecting the data of the sample into the userSample element
@@ -136,7 +136,7 @@ public abstract class DrumRackProcessor
 
             if (string.IsNullOrEmpty(drumSample.ReceivingNote))
             {
-                return processingResult.SetValue(ProcessingResult.ValueEnum.GenericError);
+                return processingResult.Set(ProcessingResult.ValueEnum.GenericError);
             }
 
             var zoneSettings = drumBranchPreset.Element("ZoneSettings");
@@ -171,13 +171,10 @@ public abstract class DrumRackProcessor
         {
             Console.WriteLine("An error occurred: " + ex.Message);
 
-            return processingResult.SetValue(ProcessingResult.ValueEnum.GenericError);
+            return processingResult.Set(ProcessingResult.ValueEnum.GenericError);
         }
 
-        processingResult.Value = ProcessingResult.ValueEnum.Ok;
-        processingResult.
-        
-        return processingResult.SetValue(ProcessingResult.ValueEnum.Ok);
+        return processingResult.Set(ProcessingResult.ValueEnum.Ok, drumSampleList.Select(_ => _.Path).ToList());
     }
 
     /// <summary>

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 
 namespace LiveToMoveUI.Models;
 
@@ -18,17 +19,18 @@ public sealed class ProcessingResult
     public ProcessingResult()
     { }
     
-    public ProcessingResult(string path, ValueEnum value)
+    public ProcessingResult(string filePath)
     {
-        this.Path = path;
-        this.Value = value;
+        this.FilePath = filePath;
     }
     
-    public string Path { get; set; }
+    public string FilePath { get; }
+    
+    public List<string> SamplePathList { get; set; }
     
     public ValueEnum Value { get; set; }
 
-    public string FileName => System.IO.Path.GetFileName(this.Path);
+    public string FileName => System.IO.Path.GetFileName(this.FilePath);
     
     public string ValueString => this.Value switch
     {
@@ -39,9 +41,10 @@ public sealed class ProcessingResult
         _ => throw new ArgumentOutOfRangeException()
     };
     
-    public ProcessingResult SetValue(ValueEnum value)
+    public ProcessingResult Set(ValueEnum value, List<string> samplePathList = null)
     {
         this.Value = value;
+        this.SamplePathList = samplePathList;
 
         return this;
     }
