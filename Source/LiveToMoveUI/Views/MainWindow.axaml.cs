@@ -10,7 +10,11 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 
 using LiveToMoveUI.Core;
+using LiveToMoveUI.Core.Json;
 using LiveToMoveUI.Models;
+
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace LiveToMoveUI.Views;
 
@@ -142,6 +146,18 @@ public partial class MainWindow : Window
         
         ReportGenerator.Generate(result, Path.Combine(targetPath, REPORT_FILE_NAME));
 
+        var preset = MovePresetGenerator.GenerateDrumRack(result[0].FileName, result[0].SamplePathList);
+        
+        // !!! Only for debug purpose !!!
+        var settings = new JsonSerializerSettings
+        {
+            ContractResolver = new CustomContractResolver(),
+            Formatting = Formatting.Indented,
+            NullValueHandling = NullValueHandling.Ignore
+        };
+        var t = JsonConvert.SerializeObject(preset, settings);
+        // !!! Only for debug purpose !!!
+        
         if (this.PresetBundleCheckbox.IsChecked ?? false)
         {
             // TODO: ...

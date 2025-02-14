@@ -10,22 +10,53 @@ public sealed class MovePreset
     
     public class Params
     {
-        public bool Enabled { get; set; } = true;
-        public double Macro0 { get; set; } = 0.0;
-        public double Macro1 { get; set; } = 0.0;
-        public double Macro2 { get; set; } = 0.0;
-        public double Macro3 { get; set; } = 0.0;
-        public double Macro4 { get; set; } = 0.0;
-        public double Macro5 { get; set; } = 0.0;
-        public double Macro6 { get; set; } = 0.0;
-        public double Macro7 { get; set; } = 0.0;
+        [JsonProperty("Enabled")]
+        public bool? Enabled { get; set; }
+        
+        [JsonProperty("Macro0")]
+        public double? Macro0 { get; set; }
+        
+        [JsonProperty("Macro1")]
+        public double? Macro1 { get; set; }
+        
+        [JsonProperty("Macro2")]
+        public double? Macro2 { get; set; }
+        
+        [JsonProperty("Macro3")]
+        public double? Macro3 { get; set; }
+        
+        [JsonProperty("Macro4")]
+        public double? Macro4 { get; set; }
+        
+        [JsonProperty("Macro5")]
+        public double? Macro5 { get; set; }
+        
+        [JsonProperty("Macro6")]
+        public double? Macro6 { get; set; }
+        
+        [JsonProperty("Macro7")]
+        public double? Macro7 { get; set; }
 
         [JsonProperty("Voice_Envelope_Hold")]
-        public double VoiceEnvelopeHold { get; set; } = 0.0;
+        public double? VoiceEnvelopeHold { get; set; }
+        
+        public static Params Default() => new Params()
+        {
+            Enabled = true,
+
+            Macro0 = 0.0d, Macro1 = 0.0d, 
+            Macro2 = 0.0d, Macro3 = 0.0d,
+            Macro4 = 0.0d, Macro5 = 0.0d,
+            Macro6 = 0.0d, Macro7 = 0.0d
+        };
     }
 
     public class Chain
     {
+        public string Name { get; set; } = string.Empty;
+
+        public int Color { get; set; } = 0;
+        
         public List<Device> Devices { get; set; }
         
         public Mixer Mixer { get; set; }
@@ -45,23 +76,24 @@ public sealed class MovePreset
 
     public class Device
     {
-        public string PresetUri { get; set; } = null;
+        public string PresetUri { get; set; }
         
         public string Kind { get; set; }
         
-        public string Name { get; set; } = "";
+        public string Name { get; set; } = string.Empty;
         
-        public Params Params { get; set; }
+        public Params Parameters { get; set; }
         
         public List<Chain> Chains { get; set; }
         
         public List<Chain> ReturnChains { get; set; }
-        
-        public DeviceData DeviceData { get; set; }
+
+        public DeviceData? DeviceData { get; set; } = null;
 
         public static Device DrumRack(List<Chain> drumCells) => new Device()
         {
             Kind = "drumRack",
+            Parameters = Params.Default(),
             Chains = drumCells,
             ReturnChains = [MovePreset.Chain.ReverbReturnChain()]
         };
@@ -72,14 +104,15 @@ public sealed class MovePreset
             DeviceData = new MovePreset.DeviceData
             {
                 SampleUri = samplePath
-            }
+            },
+            Parameters = new Params { VoiceEnvelopeHold = 60.0 }
         };
         
         public static Device Reverb() => new Device
         {
             Kind = "reverb",
             Name = "Reverb",
-            Params = new Params(),
+            Parameters = new Params(),
             DeviceData = new DeviceData()
         };
         
@@ -87,7 +120,7 @@ public sealed class MovePreset
         {
             Kind = "saturator",
             Name = "Saturator",
-            Params = new Params(),
+            Parameters = new Params(),
             DeviceData = new DeviceData()
         };
     }
@@ -109,7 +142,7 @@ public sealed class MovePreset
         
         public double Volume { get; set; } = 0.0;
         
-        public List<Send> Sends { get; set; }
+        public List<Send> Sends { get; set; } = new List<Send>();
 
         public static Mixer Default(bool isEnabled = true) => new Mixer
         {
@@ -140,8 +173,8 @@ public sealed class MovePreset
     public string Kind { get; set; } = "instrumentRack";
     
     public string Name { get; set; }
-    
-    public Params Parameters { get; set; } = new();
+
+    public Params Parameters => Params.Default();
     
     public List<Chain> Chains { get; set; }
 }

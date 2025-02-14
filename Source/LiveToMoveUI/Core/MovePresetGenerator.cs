@@ -40,7 +40,7 @@ public class MovePresetGenerator
                         MovePreset.Device.DrumRack(drumCells),
                         MovePreset.Device.Saturator()
                     ],
-                    Mixer = MovePreset.Mixer.Default()
+                    Mixer = new MovePreset.Mixer()
                 }
             ]
         };

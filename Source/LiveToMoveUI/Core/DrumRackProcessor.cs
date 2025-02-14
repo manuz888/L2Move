@@ -241,8 +241,9 @@ public abstract class DrumRackProcessor
 
                 drumSampleList.Add(new DrumSample(drumBranchId, sampleRefElement, receivingNote, path));
             }
-
-            return drumSampleList;
+            
+            // Ordering based notes
+            return drumSampleList.OrderBy(_ => _.ReceivingNote).ToList();
         }
         catch (Exception ex)
         {
