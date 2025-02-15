@@ -1,7 +1,8 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="LiveToMoveUI.App"
-             RequestedThemeVariant="Dark">
+             RequestedThemeVariant="Dark"
+             Name="L2Move">
     
     <Application.Styles>
         <FluentTheme/>
@@ -46,4 +47,9 @@
             </Style>
         </Style>
     </Application.Styles>
+    
+    <!-- To override the default one -->
+    <NativeMenu.Menu>
+        <NativeMenu/>
+    </NativeMenu.Menu>
 </Application>

@@ -143,8 +143,12 @@ public partial class MainWindow : Window
         
         var targetPath = Path.Combine(Path.GetDirectoryName(_sourcePathList[0]), TARGET_DIRECTORY);
         var result = DrumRackProcessor.Process(_sourcePathList, targetPath);
-        
-        ReportGenerator.Generate(result, Path.Combine(targetPath, REPORT_FILE_NAME));
+
+        // If the source are multiple, so the report will be generated
+        if (_sourcePathList.Count > 1)
+        {
+            ReportGenerator.Generate(result, Path.Combine(targetPath, REPORT_FILE_NAME));
+        }
 
         var preset = MovePresetGenerator.GenerateDrumRack(result[0].FileName, result[0].SamplePathList);
         

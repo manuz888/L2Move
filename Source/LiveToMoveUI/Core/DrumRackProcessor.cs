@@ -219,8 +219,6 @@ public abstract class DrumRackProcessor
                 // Look for FileRef under the SampleRef element
                 if (sampleRefElement?.Element("FileRef") == null)
                 {
-                    // TODO: notify error
-                    
                     continue;
                 }
                 

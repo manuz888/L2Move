@@ -43,11 +43,9 @@ public sealed class MovePreset
         public static Params Default() => new Params()
         {
             Enabled = true,
-
-            Macro0 = 0.0d, Macro1 = 0.0d, 
-            Macro2 = 0.0d, Macro3 = 0.0d,
-            Macro4 = 0.0d, Macro5 = 0.0d,
-            Macro6 = 0.0d, Macro7 = 0.0d
+            
+            Macro0 = 0.0d, Macro1 = 0.0d, Macro2 = 0.0d, Macro3 = 0.0d,
+            Macro4 = 0.0d, Macro5 = 0.0d, Macro6 = 0.0d, Macro7 = 0.0d
         };
     }
 
