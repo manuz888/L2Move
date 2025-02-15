@@ -1,9 +1,16 @@
+using System;
 using System.Reflection;
 
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
 namespace LiveToMoveUI.Core.Json;
+
+/// <summary>
+/// Custom attribute to force property inclusion even if null
+/// </summary>
+[AttributeUsage(AttributeTargets.Property)]
+public class AlwaysIncludeAttribute : Attribute { }
 
 public class CustomContractResolver: DefaultContractResolver
 {
@@ -16,8 +23,8 @@ public class CustomContractResolver: DefaultContractResolver
     {
         var property = base.CreateProperty(member, memberSerialization);
 
-        // Ensure string properties are always included, even if they are null
-        if (property.PropertyType == typeof(string))
+        // Check if the property has the AlwaysInclude attribute
+        if (member.GetCustomAttribute<AlwaysIncludeAttribute>() != null)
         {
             property.NullValueHandling = NullValueHandling.Include;
         }

@@ -26,9 +26,9 @@
                        Margin="0,8,0,0">
                 > Credits
                 <ToolTip.Tip>
-                    <StackPanel Width="260">
+                    <StackPanel Width="210">
                         <TextBlock TextAlignment="Left" FontSize="11">
-                            Dev: Manuele Nerucci (nerucci.manuele@gmail.com)<LineBreak/>
+                            Dev: Manuz (nerucci.manuele@gmail.com)<LineBreak/>
                             Font: Val Kalinic (see exfont.com)
                             <LineBreak/><LineBreak/>
                             Thanks to:<LineBreak/>

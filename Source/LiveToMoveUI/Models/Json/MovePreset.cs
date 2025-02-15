@@ -2,6 +2,8 @@ using System.Collections.Generic;
 
 using Newtonsoft.Json;
 
+using LiveToMoveUI.Core.Json;
+
 namespace LiveToMoveUI.Models.Json;
 
 public sealed class MovePreset
@@ -74,6 +76,7 @@ public sealed class MovePreset
 
     public class Device
     {
+        [AlwaysInclude]
         public string PresetUri { get; set; }
         
         public string Kind { get; set; }
@@ -85,8 +88,8 @@ public sealed class MovePreset
         public List<Chain> Chains { get; set; }
         
         public List<Chain> ReturnChains { get; set; }
-
-        public DeviceData? DeviceData { get; set; } = null;
+        
+        public DeviceData DeviceData { get; set; }
 
         public static Device DrumRack(List<Chain> drumCells) => new Device()
         {

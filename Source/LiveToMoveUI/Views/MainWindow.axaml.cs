@@ -14,15 +14,29 @@ using LiveToMoveUI.Core.Json;
 using LiveToMoveUI.Models;
 
 using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 
 namespace LiveToMoveUI.Views;
 
 public partial class MainWindow : Window
 {
+    #region Constants
+
     private const string DRUM_RACK_LIVE_EXTENSION = ".adg";
     private const string TARGET_DIRECTORY = "Processed";
     private const string REPORT_FILE_NAME = "report.txt";
+
+    private const string RESULT_STRING = "Result";
+    private static readonly string RESULT_OK_STRING = $"{RESULT_STRING}: Ok";
+    private static readonly string RESULT_WARNING_STRING = $"{RESULT_STRING}: Ok but see report";
+    private static readonly string RESULT_ERROR_STRING = $"{RESULT_STRING}: Error (see report)";
+
+    private const string PROCESSING_STRING = "Processing";
+
+    private const string PREFIX_FOR_SOURCE = "> ";
+    private const string DIRECTORY_STRING = "Directory";
+    private const string FILE_STRING = "File";
+
+    #endregion
     
     private List<string> _sourcePathList;
     
@@ -102,16 +116,16 @@ public partial class MainWindow : Window
             return;
         }
         
-        var prefix = ">";
+        var prefix = PREFIX_FOR_SOURCE;
         if (File.Exists(path))
         {
-            prefix += "File:";
+            prefix += FILE_STRING;
             
             _sourcePathList = [path];
         }
         else if (Directory.Exists(path))
         {
-            prefix += "Directory:";
+            prefix += DIRECTORY_STRING;
             
             Helpers.GetFilesFromPathByExtension(DRUM_RACK_LIVE_EXTENSION, path, out _sourcePathList);
         }
@@ -124,7 +138,7 @@ public partial class MainWindow : Window
         this.ResultBlock.Opacity = 0;
         this.ProcessButton.IsEnabled = true;
         
-        this.DropBoxBlock.Text = $"{prefix}\n{Path.GetFileName(path)}";
+        this.DropBoxBlock.Text = $"{prefix}:\n{Path.GetFileName(path)}";
     }
 
     private async void OnProcessClicked(object? sender, RoutedEventArgs e)
@@ -132,16 +146,26 @@ public partial class MainWindow : Window
         // Recheck for safe reason
         if (_sourcePathList == null || _sourcePathList.Count <= 0)
         {
-            // TODO: add a message error?
+            this.ManageResult(isError: true);
             
             return;
         }
         
+        var sourceDirectory = Path.GetDirectoryName(_sourcePathList[0]);
+        if (string.IsNullOrEmpty(sourceDirectory) || !Directory.Exists(sourceDirectory))
+        {
+            this.ManageResult(isError: true);
+            
+            return;
+        }
+        
+        this.IsEnabled = false;
+        
         var processButtonLabel = this.ProcessButton.Content;
         var animatedCts = new CancellationTokenSource();
-        _ = this.AnimateButtonText(this.ProcessButton, "Processing", animatedCts.Token);
+        _ = this.AnimateButtonText(this.ProcessButton, PROCESSING_STRING, animatedCts.Token);
         
-        var targetPath = Path.Combine(Path.GetDirectoryName(_sourcePathList[0]), TARGET_DIRECTORY);
+        var targetPath = Path.Combine(sourceDirectory, TARGET_DIRECTORY);
         var result = DrumRackProcessor.Process(_sourcePathList, targetPath);
 
         // If the source are multiple, so the report will be generated
@@ -170,25 +194,42 @@ public partial class MainWindow : Window
         var successCount = result.Count(_ => _.Value == ProcessingResult.ValueEnum.Ok);
         if (successCount == _sourcePathList.Count)
         {
-            this.ResultBlockLabel.Text = "Result: OK";
-            this.ResultBlock.Background = Brushes.LightGreen;
+            this.ManageResult(isOk: true);
         }
         else if (successCount == 0)
         {
-            this.ResultBlockLabel.Text = "Result: Error (see report)";
-            this.ResultBlock.Background = Brushes.LightCoral;
+            this.ManageResult(isError: true);
         }
         else
         {
-            this.ResultBlockLabel.Text = "Result: OK but see report";
-            this.ResultBlock.Background = Brushes.LightYellow;
+            this.ManageResult(isWarning: true);
         }
         
         await animatedCts.CancelAsync();
+        
         this.ProcessButton.Content = processButtonLabel;
         
         this.IsEnabled = true;
         this.ResultBlock.Opacity = 1;
+    }
+
+    private void ManageResult(bool isOk = false, bool isWarning = false, bool isError = false)
+    {
+        if (isOk)
+        {
+            this.ResultBlockLabel.Text = RESULT_OK_STRING;
+            this.ResultBlock.Background = Brushes.LightGreen;
+        }
+        else if (isWarning)
+        {
+            this.ResultBlockLabel.Text = RESULT_WARNING_STRING;
+            this.ResultBlock.Background = Brushes.LightYellow;
+        }
+        else
+        {
+            this.ResultBlockLabel.Text = RESULT_ERROR_STRING;
+            this.ResultBlock.Background = Brushes.LightCoral;
+        }
     }
     
     private async Task AnimateButtonText(Button button, string text, CancellationToken token)
