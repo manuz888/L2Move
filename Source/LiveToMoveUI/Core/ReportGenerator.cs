@@ -8,7 +8,7 @@ using LiveToMoveUI.Models;
 
 namespace LiveToMoveUI.Core;
 
-public abstract class ReportGenerator
+public static class ReportGenerator
 {
     #region Constants
 

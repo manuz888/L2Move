@@ -8,6 +8,8 @@ namespace LiveToMoveUI;
 
 public static class Helpers
 {
+    private static readonly byte[] GZIP_SIGNATURE = [0x1F, 0x8B];
+    
     public static bool GetFilesFromPathByExtension(string extension, string path, out List<string> fileList)
     {
         if (!extension.StartsWith('.'))
@@ -58,5 +60,16 @@ public static class Helpers
         }
        
         return Directory.Exists(path) && Helpers.GetFilesFromPathByExtension(extension, path, out _);
+    }
+    
+    public static bool IsGZipFile(string filePath)
+    {
+        var fileHeader = new byte[2];
+
+        using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+        _ = fs.Read(fileHeader, 0, 2);
+
+        return fileHeader[0] == GZIP_SIGNATURE[0] &&
+               fileHeader[1] == GZIP_SIGNATURE[1];
     }
 }

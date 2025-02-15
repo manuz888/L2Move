@@ -11,7 +11,7 @@ using LiveToMoveUI.Models;
 
 namespace LiveToMoveUI.Core;
 
-public abstract class DrumRackProcessor
+public static class DrumRackProcessor
 {
     // TODO: insert all strings as a constants
     
@@ -41,12 +41,7 @@ public abstract class DrumRackProcessor
     
     #endregion
     
-    #region Constants
-    
     private static readonly string DEFAULT_TEMPLATE_FILE_NAME = Path.Combine("Resources", "template.xml");
-    private static readonly byte[] GZIP_SIGNATURE = [0x1F, 0x8B];
-    
-    #endregion
     
     public static List<ProcessingResult> Process(List<string> sourcePathList, string targetPath)
     {
@@ -77,7 +72,7 @@ public abstract class DrumRackProcessor
         try
         {
             // Check if the ADG file is compressed (GZIP)
-            if (DrumRackProcessor.IsGZipFile(sourcePath))
+            if (Helpers.IsGZipFile(sourcePath))
             {
                 Console.WriteLine("The file is compressed. Extracting in memory...");
 
@@ -177,27 +172,6 @@ public abstract class DrumRackProcessor
         return processingResult.Set(ProcessingResult.ValueEnum.Ok, drumSampleList.Select(_ => _.Path).ToList());
     }
 
-    /// <summary>
-    /// Checks if the file, based on file path, is gzip or not.
-    /// </summary>
-    /// <param name="filePath"></param>
-    /// <returns></returns>
-    private static bool IsGZipFile(string filePath)
-    {
-        var fileHeader = new byte[2];
-
-        using var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-        _ = fs.Read(fileHeader, 0, 2);
-
-        return fileHeader[0] == GZIP_SIGNATURE[0] &&
-               fileHeader[1] == GZIP_SIGNATURE[1];
-    }
-    
-    /// <summary>
-    /// Extract drum samples from an XML Stream, based on an ADG file.
-    /// </summary>
-    /// <param name="xmlStream"></param>
-    /// <returns></returns>
     private static List<DrumSample> ExtractDrumSamplesFromAdgStream(Stream xmlStream)
     {
         try
@@ -241,7 +215,7 @@ public abstract class DrumRackProcessor
             }
             
             // Ordering based notes
-            return drumSampleList.OrderBy(_ => _.ReceivingNote).ToList();
+            return drumSampleList.OrderByDescending(_ => _.ReceivingNote).ToList();
         }
         catch (Exception ex)
         {

@@ -10,10 +10,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 
 using LiveToMoveUI.Core;
-using LiveToMoveUI.Core.Json;
 using LiveToMoveUI.Models;
-
-using Newtonsoft.Json;
 
 namespace LiveToMoveUI.Views;
 
@@ -166,43 +163,37 @@ public partial class MainWindow : Window
         _ = this.AnimateButtonText(this.ProcessButton, PROCESSING_STRING, animatedCts.Token);
         
         var targetPath = Path.Combine(sourceDirectory, TARGET_DIRECTORY);
-        var result = DrumRackProcessor.Process(_sourcePathList, targetPath);
+        var processingResultList = DrumRackProcessor.Process(_sourcePathList, targetPath);
 
         // If the source are multiple, so the report will be generated
         if (_sourcePathList.Count > 1)
         {
-            ReportGenerator.Generate(result, Path.Combine(targetPath, REPORT_FILE_NAME));
+            ReportGenerator.Generate(processingResultList, Path.Combine(targetPath, REPORT_FILE_NAME));
         }
 
-        var preset = MovePresetGenerator.GenerateDrumRack(result[0].FileName, result[0].SamplePathList);
-        
-        // !!! Only for debug purpose !!!
-        var settings = new JsonSerializerSettings
-        {
-            ContractResolver = new CustomContractResolver(),
-            Formatting = Formatting.Indented,
-            NullValueHandling = NullValueHandling.Ignore
-        };
-        var t = JsonConvert.SerializeObject(preset, settings);
-        // !!! Only for debug purpose !!!
-        
-        if (this.PresetBundleCheckbox.IsChecked ?? false)
-        {
-            // TODO: ...
-        }
-        
-        var successCount = result.Count(_ => _.Value == ProcessingResult.ValueEnum.Ok);
-        if (successCount == _sourcePathList.Count)
+        var processingOkList = processingResultList.Where(_ => _.Value == ProcessingResult.ValueEnum.Ok);
+        if (processingOkList.Count() == _sourcePathList.Count)
         {
             this.ManageResult(isOk: true);
         }
-        else if (successCount == 0)
+        else if (!processingOkList.Any())
         {
             this.ManageResult(isError: true);
         }
         else
         {
             this.ManageResult(isWarning: true);
+        }
+        
+        if (this.PresetBundleCheckbox.IsChecked ?? false)
+        {
+            foreach (var processingOk in processingOkList)
+            {
+                var presetName = Path.GetFileNameWithoutExtension(processingOk.FileName);
+                var samplePathList = processingOk.SamplePathList;
+                
+                MovePresetManager.GenerateDrumRack(presetName, samplePathList, targetPath);
+            }
         }
         
         await animatedCts.CancelAsync();
