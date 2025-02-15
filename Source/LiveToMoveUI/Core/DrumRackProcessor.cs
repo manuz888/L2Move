@@ -204,6 +204,11 @@ public static class DrumRackProcessor
                     ?.Element("Path")
                     ?.Attribute("Value")?.Value;
 
+                if (string.IsNullOrEmpty(receivingNote) || string.IsNullOrEmpty(path))
+                {
+                    continue;
+                }
+
                 // Add the default id for safe
                 sampleRefElement.SetAttributeValue("Id", 0);
         
