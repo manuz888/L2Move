@@ -10,7 +10,7 @@ mkdir -p L2Move.app/Contents/MacOS L2Move.app/Contents/Resources
 cp -R bin/Release/net8.0/osx-x64/publish/* L2Move.app/Contents/MacOS/
 
 # Execute permission
-chmod +x L2Move.app/Contents/MacOS/LiveToMoveUI
+chmod +x L2Move.app/Contents/MacOS/L2Move
 
 # Create Info.plist
 cat > L2Move.app/Contents/Info.plist <<EOL
@@ -19,7 +19,7 @@ cat > L2Move.app/Contents/Info.plist <<EOL
 <plist version="1.0">
 <dict>
     <key>CFBundleName</key>
-    <string>LiveToMoveUI</string>
+    <string>L2Move</string>
     <key>CFBundleDisplayName</key>
     <string>L2Move</string>
     <key>CFBundleIdentifier</key>
@@ -29,7 +29,7 @@ cat > L2Move.app/Contents/Info.plist <<EOL
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleExecutable</key>
-    <string>LiveToMoveUI</string>
+    <string>L2Move</string>
     <key>CFBundleIconFile</key>
     <string>AppIcon.icns</string>
     <key>NSHighResolutionCapable</key>
