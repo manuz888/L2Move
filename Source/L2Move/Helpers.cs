@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 using Avalonia.Input;
 
-namespace LiveToMoveUI;
+namespace L2Move;
 
 public static class Helpers
 {

@@ -7,9 +7,9 @@ using System.Xml.Linq;
 using System.IO.Compression;
 using System.Collections.Generic;
 
-using LiveToMoveUI.Models;
+using L2Move.Models;
 
-namespace LiveToMoveUI.Core;
+namespace L2Move.Core;
 
 public static class DrumRackProcessor
 {

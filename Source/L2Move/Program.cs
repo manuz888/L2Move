@@ -1,8 +1,9 @@
-﻿using Avalonia;
-using Avalonia.ReactiveUI;
-using System;
+﻿using System;
 
-namespace LiveToMoveUI;
+using Avalonia;
+using Avalonia.ReactiveUI;
+
+namespace L2Move;
 
 sealed class Program
 {

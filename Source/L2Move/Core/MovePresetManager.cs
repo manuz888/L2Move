@@ -5,10 +5,10 @@ using System.Collections.Generic;
 
 using Newtonsoft.Json;
 
-using LiveToMoveUI.Core.Json;
-using LiveToMoveUI.Models.Json;
+using L2Move.Core.Json;
+using L2Move.Models.Json;
 
-namespace LiveToMoveUI.Core;
+namespace L2Move.Core;
 
 public static class MovePresetManager
 {

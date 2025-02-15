@@ -2,9 +2,9 @@ using Avalonia;
 using Avalonia.Markup.Xaml;
 using Avalonia.Controls.ApplicationLifetimes;
 
-using LiveToMoveUI.Views;
+using L2Move.Views;
 
-namespace LiveToMoveUI;
+namespace L2Move;
 
 public partial class App : Application
 {

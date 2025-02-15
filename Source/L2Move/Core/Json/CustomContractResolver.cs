@@ -4,7 +4,7 @@ using System.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
-namespace LiveToMoveUI.Core.Json;
+namespace L2Move.Core.Json;
 
 /// <summary>
 /// Custom attribute to force property inclusion even if null

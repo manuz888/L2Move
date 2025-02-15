@@ -2,9 +2,9 @@ using System.Collections.Generic;
 
 using Newtonsoft.Json;
 
-using LiveToMoveUI.Core.Json;
+using L2Move.Core.Json;
 
-namespace LiveToMoveUI.Models.Json;
+namespace L2Move.Models.Json;
 
 public sealed class MovePreset
 {

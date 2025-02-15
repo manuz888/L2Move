@@ -2,7 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
     <Style Selector=":is(TopLevel)">
-        <Setter Property="FontFamily" Value="avares://LiveToMoveUI/Assets/VPPixel-Standard.ttf#VP Pixel"/>
+        <Setter Property="FontFamily" Value="avares://L2Move/Assets/VPPixel-Standard.ttf#VP Pixel"/>
     </Style>
         
     <Style Selector="Button">

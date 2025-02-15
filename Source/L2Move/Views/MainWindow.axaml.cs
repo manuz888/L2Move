@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -10,10 +9,10 @@ using Avalonia.Media;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 
-using LiveToMoveUI.Core;
-using LiveToMoveUI.Models;
+using L2Move.Core;
+using L2Move.Models;
 
-namespace LiveToMoveUI.Views;
+namespace L2Move.Views;
 
 public partial class MainWindow : Window
 {

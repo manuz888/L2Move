@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace LiveToMoveUI.Models;
+namespace L2Move.Models;
 
 public sealed class ProcessingResult
 {

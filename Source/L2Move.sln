@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LiveToMoveUI", "LiveToMoveUI\LiveToMoveUI.csproj", "{96792E07-824C-423B-A442-DD253D7FE0B1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "L2Move", "L2Move\L2Move.csproj", "{96792E07-824C-423B-A442-DD253D7FE0B1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
