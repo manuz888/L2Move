@@ -1,0 +1,43 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Style Selector=":is(TopLevel)">
+        <Setter Property="FontFamily" Value="avares://LiveToMoveUI/Assets/VPPixel-Standard.ttf#VP Pixel"/>
+    </Style>
+        
+    <Style Selector="Button">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="White"/>
+        <Setter Property="BorderBrush" Value="White"/>
+        <Setter Property="BorderThickness" Value="2"/>
+        <Setter Property="CornerRadius" Value="5"/>
+        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="HorizontalAlignment" Value="Center"/>
+            
+        <Style Selector="^:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="Foreground" Value="Black"/>
+        </Style>
+            
+        <Style Selector="^:disabled /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="White"/>
+            <Setter Property="BorderThickness" Value="2"/>
+            <Setter Property="CornerRadius" Value="5"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Opacity" Value="0.7"/>
+        </Style>
+    </Style>
+        
+    <Style Selector="CheckBox:checked">
+        <Style Selector="^ /template/ Border#NormalRectangle">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderBrush" Value="White"/>
+        </Style>
+            
+        <Style Selector="^ /template/ Path#CheckGlyph">
+            <Setter Property="Fill" Value="Black"/>
+        </Style>
+    </Style>
+</Styles>
