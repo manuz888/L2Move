@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -158,12 +159,13 @@ public partial class MainWindow : Window
         
         this.IsEnabled = false;
         
-        var processButtonLabel = this.ProcessButton.Content;
         var animatedCts = new CancellationTokenSource();
+
+        var processButtonLabel = this.ProcessButton.Content;
         _ = this.AnimateButtonText(this.ProcessButton, PROCESSING_STRING, animatedCts.Token);
         
         var targetPath = Path.Combine(sourceDirectory, TARGET_DIRECTORY);
-        var processingResultList = DrumRackProcessor.Process(_sourcePathList, targetPath);
+        var processingResultList = await Task.Run(() => DrumRackProcessor.Process(_sourcePathList, targetPath));
 
         // If the source are multiple, so the report will be generated
         if (_sourcePathList.Count > 1)
@@ -184,7 +186,7 @@ public partial class MainWindow : Window
         {
             this.ManageResult(isWarning: true);
         }
-        
+
         if (this.PresetBundleCheckbox.IsChecked ?? false)
         {
             foreach (var processingOk in processingOkList)
@@ -192,12 +194,12 @@ public partial class MainWindow : Window
                 var presetName = Path.GetFileNameWithoutExtension(processingOk.FileName);
                 var samplePathList = processingOk.SamplePathList;
                 
-                MovePresetManager.GenerateDrumRack(presetName, samplePathList, targetPath);
+                // TODO: feedback error to user
+                await Task.Run(() => MovePresetManager.GenerateDrumRack(presetName, samplePathList, targetPath));
             }
         }
         
         await animatedCts.CancelAsync();
-        
         this.ProcessButton.Content = processButtonLabel;
         
         this.IsEnabled = true;

@@ -33,28 +33,30 @@ public static class MovePresetManager
             return false;
         }
         
-        var presetDirectory = Path.Combine(targetPath, presetName);
+        var presetDirectoryPath = Path.Combine(targetPath, presetName);
+        var presetBundlePath =  Path.Combine(targetPath, presetName + PRESET_BUNDLE_EXTENSION);
         
         // If directory exists, append timestamp to create unique one
-        if (Directory.Exists(presetDirectory))
+        if (File.Exists(presetBundlePath))
         {
             presetName += "_" + DateTime.Now.ToString("yyyyMMdd-HHmmss");
-            presetDirectory = Path.Combine(targetPath, presetName);
+            
+            presetDirectoryPath = Path.Combine(targetPath, presetName);
+            presetBundlePath =  Path.Combine(targetPath, presetName + PRESET_BUNDLE_EXTENSION);
         }
-        
-        var samplesDirectory = Path.Combine(presetDirectory, "Samples"); // Subdirectory for samples
         
         try
         {
-            Directory.CreateDirectory(presetDirectory);
+            Directory.CreateDirectory(presetDirectoryPath);
 
             var drumPreset = MovePresetManager.NewDrumRackPreset(presetName, drumSampleList);
             
-            File.WriteAllText(Path.Combine(presetDirectory, PRESET_JSON_FILE_NAME),
+            File.WriteAllText(Path.Combine(presetDirectoryPath, PRESET_JSON_FILE_NAME),
                               JsonConvert.SerializeObject(drumPreset, JSON_SETTINGS));
 
+            var samplesDirectory = Path.Combine(presetDirectoryPath, "Samples");
             Directory.CreateDirectory(samplesDirectory);
-
+            
             foreach (var drumSample in drumSampleList)
             {
                 var destinationFile = Path.Combine(samplesDirectory, Path.GetFileName(drumSample));
@@ -70,14 +72,8 @@ public static class MovePresetManager
                 }
             }
 
-            var presetBundleName = presetName + PRESET_BUNDLE_EXTENSION;
-            if (File.Exists(presetBundleName))
-            {
-                File.Delete(presetBundleName);
-            }
-            
-            ZipFile.CreateFromDirectory(presetDirectory, Path.Combine(targetPath, presetBundleName));
-            Directory.Delete(presetDirectory, true);
+            ZipFile.CreateFromDirectory(presetDirectoryPath, presetBundlePath);
+            Directory.Delete(presetDirectoryPath, true);
         }
         catch (Exception ex)
         {
@@ -85,7 +81,7 @@ public static class MovePresetManager
 
             return false;
         }
-        
+
         return true;
     }
 
