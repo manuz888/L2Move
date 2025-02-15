@@ -13,6 +13,9 @@
         <PublishReadyToRun>true</PublishReadyToRun>
         <MacOSAppIcon>Assets/AppIcon.icns</MacOSAppIcon>
     </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+      <DebugType>full</DebugType>
+    </PropertyGroup>
 
     <ItemGroup>
         <AvaloniaResource Include="Assets\**" />

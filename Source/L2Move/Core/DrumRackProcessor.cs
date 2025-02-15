@@ -41,7 +41,7 @@ public static class DrumRackProcessor
     
     #endregion
     
-    private static readonly string DEFAULT_TEMPLATE_FILE_NAME = Path.Combine("Resources", "template.xml");
+    private static readonly string DEFAULT_TEMPLATE_FILE_NAME = Path.Combine(AppContext.BaseDirectory, "Resources", "template.xml");
     
     public static List<ProcessingResult> Process(List<string> sourcePathList, string targetPath)
     {

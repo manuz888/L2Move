@@ -4,16 +4,16 @@
 dotnet publish -r osx-x64 -c Release
 
 # Create dir and structure
-mkdir -p L2Move.app/Contents/MacOS L2Move.app/Contents/Resources
+mkdir -p bin/Release/publish/L2Move.app/Contents/MacOS bin/Release/publish/L2Move.app/Contents/Resources
 
 # Copy binary into .app
-cp -R bin/Release/net8.0/osx-x64/publish/* L2Move.app/Contents/MacOS/
+cp -R bin/Release/net8.0/osx-x64/publish/* bin/Release/publish/L2Move.app/Contents/MacOS/
 
 # Execute permission
-chmod +x L2Move.app/Contents/MacOS/L2Move
+chmod +x bin/Release/publish/L2Move.app/Contents/MacOS/L2Move
 
 # Create Info.plist
-cat > L2Move.app/Contents/Info.plist <<EOL
+cat > bin/Release/publish/L2Move.app/Contents/Info.plist <<EOL
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -39,6 +39,6 @@ cat > L2Move.app/Contents/Info.plist <<EOL
 EOL
 
 # Copy icon 
-cp Assets/AppIcon.icns L2Move.app/Contents/Resources/
+cp Assets/AppIcon.icns bin/Release/publish/L2Move.app/Contents/Resources/
 
-echo ".app created successfully"
+echo "L2Move.app created successfully"
