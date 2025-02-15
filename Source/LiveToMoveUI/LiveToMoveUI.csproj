@@ -4,8 +4,13 @@
         <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
         <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
-        <ApplicationManifest>app.manifest</ApplicationManifest>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+        
+        <!--MacOS-->
+        <PublishSingleFile>true</PublishSingleFile>
+        <SelfContained>true</SelfContained>
+        <PublishTrimmed>true</PublishTrimmed>
+        <PublishReadyToRun>true</PublishReadyToRun>
         <MacOSAppIcon>Assets/AppIcon.icns</MacOSAppIcon>
     </PropertyGroup>
 
@@ -28,5 +33,7 @@
       <None Update="Resources\template.xml">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </None>
+      <None Remove="build.sh" />
+      <None Remove="build-and-pack.sh" />
     </ItemGroup>
 </Project>
