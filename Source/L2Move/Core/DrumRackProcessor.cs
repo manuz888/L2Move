@@ -117,22 +117,19 @@ public static class DrumRackProcessor
             var drumSample = drumSampleList.FirstOrDefault(p => p.Id == presetId);
             if (drumSample == null)
             {
-                return processingResult.Set(ProcessingResult.ValueEnum.GenericError);
+                // A drum branch might not have a drum sample set
+                continue;
             }
 
             var userSample = drumBranchPreset.Descendants("UserSample").FirstOrDefault();
-            if (userSample == null)
+            if (string.IsNullOrEmpty(drumSample.ReceivingNote) || userSample == null)
             {
-                return processingResult.Set(ProcessingResult.ValueEnum.GenericError);
+                // Trying to go ahead and hope for better luck with the next one
+                continue;
             }
 
             // Injecting the data of the sample into the userSample element
             userSample.Element("Value")?.Add(drumSample.Body);
-
-            if (string.IsNullOrEmpty(drumSample.ReceivingNote))
-            {
-                return processingResult.Set(ProcessingResult.ValueEnum.GenericError);
-            }
 
             var zoneSettings = drumBranchPreset.Element("ZoneSettings");
             var receivingNote = zoneSettings?.Element("ReceivingNote");

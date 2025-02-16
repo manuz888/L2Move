@@ -68,15 +68,20 @@ public static class MovePresetManager
                 else
                 {
                     // Something goes wrong
-                    return false;
+                    throw new FileNotFoundException($"The file {drumSample} was not found.");
                 }
             }
 
             ZipFile.CreateFromDirectory(presetDirectoryPath, presetBundlePath);
-            Directory.Delete(presetDirectoryPath, true);
+            Directory.Delete(presetDirectoryPath, recursive: true);
         }
         catch (Exception ex)
         {
+            if (Directory.Exists(presetDirectoryPath))
+            {
+                Directory.Delete(presetDirectoryPath, recursive: true);
+            }
+            
             Console.WriteLine($"Error: {ex.Message}");
 
             return false;

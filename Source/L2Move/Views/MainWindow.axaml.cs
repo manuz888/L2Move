@@ -25,7 +25,7 @@ public partial class MainWindow : Window
     private const string RESULT_STRING = "Result";
     private static readonly string RESULT_OK_STRING = $"{RESULT_STRING}: Ok";
     private static readonly string RESULT_WARNING_STRING = $"{RESULT_STRING}: Ok but see report";
-    private static readonly string RESULT_ERROR_STRING = $"{RESULT_STRING}: Error (see report)";
+    private static readonly string RESULT_ERROR_STRING = $"{RESULT_STRING}: Error";
 
     private const string PROCESSING_STRING = "Processing";
 
