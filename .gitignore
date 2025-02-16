@@ -17,13 +17,16 @@ artifacts/
 Thumbs.db
 
 # ===============================
-# Visual Studio Files (if applicable)
+# Visual Studio Files (if applicable) or JetBrains Rider
 # ===============================
 # These files are generally created by Visual Studio but might appear in multi-IDE projects
 *.suo
 *.user
 *.userosscache
 *.sln.docstates
+
+# JetBrains Rider
+.idea/
 
 # ===============================
 # Log & Debug Files
