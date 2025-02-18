@@ -164,20 +164,20 @@ public partial class MainWindow : Window
         _ = this.AnimateButtonText(this.ProcessButton, PROCESSING_STRING, animatedCts.Token);
         
         var targetPath = Path.Combine(sourceDirectory, TARGET_DIRECTORY);
-        var processingResultList = await Task.Run(() => DrumRackProcessor.Process(_sourcePathList, targetPath));
+        var processResultList = await Task.Run(() => DrumRackProcessor.Process(_sourcePathList, targetPath));
 
         // If the source are multiple, so the report will be generated
         if (_sourcePathList.Count > 1)
         {
-            ReportGenerator.Generate(processingResultList, Path.Combine(targetPath, REPORT_FILE_NAME));
+            ReportGenerator.Generate(processResultList, Path.Combine(targetPath, REPORT_FILE_NAME));
         }
 
-        var processingOkList = processingResultList.Where(_ => _.Value == ProcessingResult.ValueEnum.Ok);
-        if (processingOkList.Count() == _sourcePathList.Count)
+        var processOkList = processResultList.Where(_ => _.Value == ProcessResult.ValueEnum.Ok);
+        if (processOkList.Count() == _sourcePathList.Count)
         {
             this.ManageResult(isOk: true);
         }
-        else if (!processingOkList.Any())
+        else if (!processOkList.Any())
         {
             this.ManageResult(isError: true);
         }
@@ -188,13 +188,13 @@ public partial class MainWindow : Window
 
         if (this.PresetBundleCheckbox.IsChecked ?? false)
         {
-            foreach (var processingOk in processingOkList)
+            foreach (var processingOk in processOkList)
             {
                 var presetName = Path.GetFileNameWithoutExtension(processingOk.FileName);
                 var samplePathList = processingOk.SamplePathList;
                 
                 // TODO: feedback error to user
-                await Task.Run(() => MovePresetManager.GenerateDrumRack(presetName, samplePathList, targetPath));
+                await Task.Run(() => MovePresetManager.GenerateDrumKit(presetName, samplePathList, targetPath));
             }
         }
         

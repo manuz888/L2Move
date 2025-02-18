@@ -21,9 +21,9 @@ public static class ReportGenerator
     
     #endregion
     
-    public static void Generate(List<ProcessingResult> resultList, string path)
+    public static void Generate(IEnumerable<ProcessResult> resultList, string path)
     {
-        if (resultList == null || resultList.Count <= 0)
+        if (resultList == null || !resultList.Any())
         {
             Console.WriteLine("No files to report.");
             

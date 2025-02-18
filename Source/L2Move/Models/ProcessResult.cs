@@ -1,9 +1,8 @@
 using System;
-using System.Collections.Generic;
 
 namespace L2Move.Models;
 
-public sealed class ProcessingResult
+public class ProcessResult
 {
     #region Enums
     
@@ -11,22 +10,19 @@ public sealed class ProcessingResult
     {
         Ok,
         GenericError,
+        
+        // Samples
         SamplesNotFound
     }
 
     #endregion
    
-    public ProcessingResult()
-    { }
-    
-    public ProcessingResult(string filePath)
+    public ProcessResult(string filePath)
     {
         this.FilePath = filePath;
     }
     
     public string FilePath { get; }
-    
-    public List<string> SamplePathList { get; set; }
     
     public ValueEnum Value { get; set; }
 
@@ -36,15 +32,17 @@ public sealed class ProcessingResult
     {
         ValueEnum.Ok => "Ok",
         ValueEnum.GenericError => "Generic error",
+        
+        // Samples
         ValueEnum.SamplesNotFound => "Samples not Found",
         
+        // Fallback
         _ => throw new ArgumentOutOfRangeException()
     };
     
-    public ProcessingResult Set(ValueEnum value, List<string> samplePathList = null)
+    public ProcessResult Set(ValueEnum value)
     {
         this.Value = value;
-        this.SamplePathList = samplePathList;
 
         return this;
     }

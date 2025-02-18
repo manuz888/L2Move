@@ -23,7 +23,7 @@ public static class MovePresetManager
         NullValueHandling = NullValueHandling.Ignore
     };
     
-    public static bool GenerateDrumRack(string presetName, List<string> drumSampleList, string targetPath)
+    public static bool GenerateDrumKit(string presetName, List<string> drumSampleList, string targetPath)
     {
         if (string.IsNullOrWhiteSpace(presetName) ||
             string.IsNullOrWhiteSpace(targetPath) ||

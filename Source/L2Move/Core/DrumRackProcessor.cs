@@ -15,37 +15,11 @@ public static class DrumRackProcessor
 {
     // TODO: insert all strings as a constants
     
-    #region Nested classes
-    
-    /// <summary>
-    /// Class representing a mapping between a DrumBranchPreset and a SampleRef
-    /// </summary>
-    private class DrumSample
-    {
-        public DrumSample(string id, XElement body, string receivingNote, string path)
-        {
-            this.Id = id;
-            this.Body = body;
-            this.ReceivingNote = receivingNote;
-            this.Path = path;
-        }
-
-        public string Id { get; }
-        
-        public XElement Body { get; }
-        
-        public string Path { get; }
-        
-        public string ReceivingNote { get; }
-    }
-    
-    #endregion
-    
     private static readonly string DEFAULT_TEMPLATE_FILE_NAME = Path.Combine(AppContext.BaseDirectory, "Resources", "template.xml");
     
-    public static List<ProcessingResult> Process(List<string> sourcePathList, string targetPath)
+    public static IEnumerable<SamplesProcessResult> Process(List<string> sourcePathList, string targetPath)
     {
-        var result = new List<ProcessingResult>();
+        var result = new List<SamplesProcessResult>();
         
         var xmlSourceTemplate = XDocument.Load(DEFAULT_TEMPLATE_FILE_NAME);
         
@@ -59,14 +33,14 @@ public static class DrumRackProcessor
         return result;
     }
 
-    private static ProcessingResult ProcessInternal(string sourcePath, string targetPath, XDocument xmlTemplate)
+    private static SamplesProcessResult ProcessInternal(string sourcePath, string targetPath, XDocument xmlTemplate)
     {
-        List<DrumSample> drumSampleList;
+        IEnumerable<XmlSample> drumSampleList;
 
-        var processingResult = new ProcessingResult(sourcePath);
+        var processingResult = new SamplesProcessResult(sourcePath);
         if (string.IsNullOrEmpty(sourcePath) || string.IsNullOrEmpty(targetPath) || xmlTemplate == null)
         {
-            return processingResult.Set(ProcessingResult.ValueEnum.GenericError);
+            return processingResult.Set(SamplesProcessResult.ValueEnum.GenericError);
         }
         
         try
@@ -95,14 +69,14 @@ public static class DrumRackProcessor
         {
             Console.WriteLine("An error occurred: " + ex.Message);
 
-            return processingResult.Set(ProcessingResult.ValueEnum.GenericError);
+            return processingResult.Set(SamplesProcessResult.ValueEnum.GenericError);
         }
 
-        if ((drumSampleList?.Count ?? 0) <= 0)
+        if ((drumSampleList?.Count() ?? 0) <= 0)
         {
             Console.WriteLine($"No drum samples found on {Path.GetFileName(sourcePath)}");
             
-            return processingResult.Set(ProcessingResult.ValueEnum.SamplesNotFound);
+            return processingResult.Set(SamplesProcessResult.ValueEnum.SamplesNotFound);
         }
 
         var drumBranchPresetList = xmlTemplate.Descendants("DrumBranchPreset");
@@ -111,7 +85,7 @@ public static class DrumRackProcessor
             var presetId = drumBranchPreset.Attribute("Id")?.Value;
             if (presetId == null)
             {
-                return processingResult.Set(ProcessingResult.ValueEnum.GenericError);
+                return processingResult.Set(SamplesProcessResult.ValueEnum.GenericError);
             }
 
             var drumSample = drumSampleList.FirstOrDefault(p => p.Id == presetId);
@@ -163,13 +137,13 @@ public static class DrumRackProcessor
         {
             Console.WriteLine("An error occurred: " + ex.Message);
 
-            return processingResult.Set(ProcessingResult.ValueEnum.GenericError);
+            return processingResult.Set(SamplesProcessResult.ValueEnum.GenericError);
         }
 
-        return processingResult.Set(ProcessingResult.ValueEnum.Ok, drumSampleList.Select(_ => _.Path).ToList());
+        return processingResult.Set(SamplesProcessResult.ValueEnum.Ok, drumSampleList.Select(_ => _.Path).ToList());
     }
 
-    private static List<DrumSample> ExtractDrumSamplesFromAdgStream(Stream xmlStream)
+    private static IEnumerable<XmlSample> ExtractDrumSamplesFromAdgStream(Stream xmlStream)
     {
         try
         {
@@ -177,7 +151,7 @@ public static class DrumRackProcessor
             
             // Find all DrumBranchPreset elements in the stream
             var drumBranchPresetList = doc.Descendants("DrumBranchPreset");
-            var drumSampleList = new List<DrumSample>();
+            var drumSampleList = new List<XmlSample>();
 
             foreach (var drumBranchPreset in drumBranchPresetList)
             {
@@ -186,7 +160,10 @@ public static class DrumRackProcessor
 
                 // Search for a SampleRef element anywhere within the current branch
                 var sampleRefElement = drumBranchPreset.Descendants("SampleRef").FirstOrDefault();
-        
+
+                // !!! Testing !!!
+                // var t = drumBranchPreset.Descendants("SampleRef");
+                
                 // Look for FileRef under the SampleRef element
                 if (sampleRefElement?.Element("FileRef") == null)
                 {
@@ -196,7 +173,7 @@ public static class DrumRackProcessor
                 var receivingNote = drumBranchPreset.Element("ZoneSettings")
                     ?.Element("ReceivingNote")
                     ?.Attribute("Value")?.Value;
-
+                
                 var path = sampleRefElement.Element("FileRef")
                     ?.Element("Path")
                     ?.Attribute("Value")?.Value;
@@ -213,17 +190,17 @@ public static class DrumRackProcessor
                 sampleRefElement.Descendants("SourceContext").Remove();
                 sampleRefElement.Add(new XElement("SourceContext"));
 
-                drumSampleList.Add(new DrumSample(drumBranchId, sampleRefElement, receivingNote, path));
+                drumSampleList.Add(new XmlSample(drumBranchId, sampleRefElement, receivingNote, path));
             }
             
-            // Ordering based notes
+            // Ordering based to notes
             return drumSampleList.OrderByDescending(_ => _.ReceivingNote).ToList();
         }
         catch (Exception ex)
         {
             Console.WriteLine("Error processing ADG XML: " + ex.Message);
 
-            return new List<DrumSample>();
+            return new List<XmlSample>();
         }
     }
 }
