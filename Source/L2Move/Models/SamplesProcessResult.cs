@@ -4,16 +4,20 @@ namespace L2Move.Models;
 
 public sealed class SamplesProcessResult : ProcessResult
 {
-    public SamplesProcessResult(string filePath)
-        : base(filePath)
+    public SamplesProcessResult(string sourceFilePath)
+        : base(sourceFilePath)
+    { }
+
+    public SamplesProcessResult(ProcessResult result)
+        : base(result.SourceFilePath)
     { }
     
-    public List<string> SamplePathList { get; set; }
+    public IEnumerable<Sample> SampleList { get; set; }
     
-    public SamplesProcessResult Set(ValueEnum value, List<string> samplePathList = null)
+    public SamplesProcessResult Set(ValueEnum value, IEnumerable<Sample> sampleList = null)
     {
         this.Value = value;
-        this.SamplePathList = samplePathList;
+        this.SampleList = sampleList;
 
         return this;
     }

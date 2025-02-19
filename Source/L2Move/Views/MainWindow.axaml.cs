@@ -11,6 +11,7 @@ using Avalonia.Interactivity;
 
 using L2Move.Core;
 using L2Move.Models;
+using L2Move.Helpers;
 
 namespace L2Move.Views;
 
@@ -80,12 +81,12 @@ public partial class MainWindow : Window
         // To prevent the drag
         eventArgs.DragEffects = DragDropEffects.None;
 
-        if (!Helpers.GetPathFromDragEvent(eventArgs, out var localPath))
+        if (!FileHelper.GetPathFromDragEvent(eventArgs, out var localPath))
         {
             return;
         }
 
-        if (Helpers.ContainsFilesWithExtension(localPath, DRUM_RACK_LIVE_EXTENSION))
+        if (FileHelper.ContainsFilesWithExtension(localPath, DRUM_RACK_LIVE_EXTENSION))
         {
             eventArgs.DragEffects = DragDropEffects.Copy;
         }
@@ -93,7 +94,7 @@ public partial class MainWindow : Window
     
     private void OnDrop(object? sender, DragEventArgs eventArgs)
     {
-        if (!Helpers.GetPathFromDragEvent(eventArgs, out var path))
+        if (!FileHelper.GetPathFromDragEvent(eventArgs, out var path))
         {
             return;
         }
@@ -108,7 +109,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        if (checkExtension && !Helpers.ContainsFilesWithExtension(path, DRUM_RACK_LIVE_EXTENSION))
+        if (checkExtension && !FileHelper.ContainsFilesWithExtension(path, DRUM_RACK_LIVE_EXTENSION))
         {
             return;
         }
@@ -124,7 +125,7 @@ public partial class MainWindow : Window
         {
             prefix += DIRECTORY_STRING;
             
-            Helpers.GetFilesFromPathByExtension(DRUM_RACK_LIVE_EXTENSION, path, out _sourcePathList);
+            FileHelper.GetFilesFromPathByExtension(DRUM_RACK_LIVE_EXTENSION, path, out _sourcePathList);
         }
         else
         {
@@ -164,7 +165,7 @@ public partial class MainWindow : Window
         _ = this.AnimateButtonText(this.ProcessButton, PROCESSING_STRING, animatedCts.Token);
         
         var targetPath = Path.Combine(sourceDirectory, TARGET_DIRECTORY);
-        var processResultList = await Task.Run(() => DrumRackProcessor.Process(_sourcePathList, targetPath));
+        var processResultList = await Task.Run(() => DrumRackAdgProcessor.Process(_sourcePathList, targetPath));
 
         // If the source are multiple, so the report will be generated
         if (_sourcePathList.Count > 1)
@@ -190,8 +191,11 @@ public partial class MainWindow : Window
         {
             foreach (var processingOk in processOkList)
             {
-                var presetName = Path.GetFileNameWithoutExtension(processingOk.FileName);
-                var samplePathList = processingOk.SamplePathList;
+                var presetName = Path.GetFileNameWithoutExtension(processingOk.SourceFileName);
+                
+                // Ordering based on notes, so on pads
+                var samplePathList = processingOk.SampleList.OrderByDescending(_ => _.ReceivingNote)
+                                                            .Select(_ => _.Path);
                 
                 // TODO: feedback error to user
                 await Task.Run(() => MovePresetManager.GenerateDrumKit(presetName, samplePathList, targetPath));

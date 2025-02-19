@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.IO.Compression;
 using System.Collections.Generic;
 
@@ -23,12 +24,13 @@ public static class MovePresetManager
         NullValueHandling = NullValueHandling.Ignore
     };
     
-    public static bool GenerateDrumKit(string presetName, List<string> drumSampleList, string targetPath)
+    // ! The order on drum sample list will define the related pad 
+    public static bool GenerateDrumKit(string presetName, IEnumerable<string> drumSampleList, string targetPath)
     {
         if (string.IsNullOrWhiteSpace(presetName) ||
             string.IsNullOrWhiteSpace(targetPath) ||
             !Directory.Exists(targetPath)         ||
-            (drumSampleList?.Count ?? 0) <= 0)
+            (drumSampleList?.Count() ?? 0) <= 0)
         {
             return false;
         }
@@ -90,7 +92,7 @@ public static class MovePresetManager
         return true;
     }
 
-    private static MovePreset NewDrumRackPreset(string presetName, List<string> drumSampleList)
+    private static MovePreset NewDrumRackPreset(string presetName, IEnumerable<string> drumSampleList)
     {
         var drumCells = new List<MovePreset.Chain>();
 

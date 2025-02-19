@@ -4,9 +4,9 @@ using System.Collections.Generic;
 
 using Avalonia.Input;
 
-namespace L2Move;
+namespace L2Move.Helpers;
 
-public static class Helpers
+public static class FileHelper
 {
     private static readonly byte[] GZIP_SIGNATURE = [0x1F, 0x8B];
     
@@ -59,7 +59,7 @@ public static class Helpers
             return true;
         }
        
-        return Directory.Exists(path) && Helpers.GetFilesFromPathByExtension(extension, path, out _);
+        return Directory.Exists(path) && FileHelper.GetFilesFromPathByExtension(extension, path, out _);
     }
     
     public static bool IsGZipFile(string filePath)

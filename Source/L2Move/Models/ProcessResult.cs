@@ -17,16 +17,16 @@ public class ProcessResult
 
     #endregion
    
-    public ProcessResult(string filePath)
+    public ProcessResult(string sourceFilePath)
     {
-        this.FilePath = filePath;
+        this.SourceFilePath = sourceFilePath;
     }
     
-    public string FilePath { get; }
+    public string SourceFilePath { get; }
     
-    public ValueEnum Value { get; set; }
+    public ValueEnum Value { get; protected set; }
 
-    public string FileName => System.IO.Path.GetFileName(this.FilePath);
+    public string SourceFileName => System.IO.Path.GetFileName(this.SourceFilePath);
     
     public string ValueString => this.Value switch
     {

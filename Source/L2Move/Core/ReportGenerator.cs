@@ -32,7 +32,7 @@ public static class ReportGenerator
 
         var generatedLine = $"Generated on: {DateTime.Now}";
         
-        var maxFileNameLength = Math.Max(FILE_NAME_COLUMN.Length, resultList.Max(f => f.FileName.Length));
+        var maxFileNameLength = Math.Max(FILE_NAME_COLUMN.Length, resultList.Max(f => f.SourceFileName.Length));
         var maxStatusLength = Math.Max(STATUS_COLUMN.Length, resultList.Max(f => f.ValueString.Length));
 
         var totalWidth = maxFileNameLength + maxStatusLength + SPACING;
@@ -56,7 +56,7 @@ public static class ReportGenerator
 
         foreach (var result in resultList)
         {
-            reportContent.AppendLine($"{result.FileName.PadRight(maxFileNameLength + SPACING)}{result.ValueString.PadRight(maxStatusLength)}");
+            reportContent.AppendLine($"{result.SourceFileName.PadRight(maxFileNameLength + SPACING)}{result.ValueString.PadRight(maxStatusLength)}");
         }
         
         reportContent.AppendLine(new string('=', totalWidth));
