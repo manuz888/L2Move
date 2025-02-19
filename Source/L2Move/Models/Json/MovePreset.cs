@@ -163,7 +163,7 @@ public sealed class MovePreset
         
         public int SendingNote { get; set; }
         
-        public int ChokeGroup { get; set; }
+        public int? ChokeGroup { get; set; }
     }
     
     #endregion

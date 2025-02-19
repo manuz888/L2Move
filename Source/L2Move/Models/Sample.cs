@@ -14,4 +14,7 @@ public class Sample
     public string Path { get; }
         
     public string ReceivingNote { get; }
+
+    // TODO: to manage
+    public string ChokeGroup { get; }
 }

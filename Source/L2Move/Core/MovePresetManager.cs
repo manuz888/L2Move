@@ -108,7 +108,7 @@ public static class MovePresetManager
                 {
                     ReceivingNote = 36 + counter,
                     SendingNote = 60,
-                    ChokeGroup = 1
+                    ChokeGroup = null  // TODO: to manage
                 }
             });
 
