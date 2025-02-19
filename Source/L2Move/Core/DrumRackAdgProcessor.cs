@@ -40,7 +40,7 @@ public static class DrumRackAdgProcessor
             return processResult.Set(ProcessResult.ValueEnum.GenericError);
         }
         
-        IEnumerable<XmlSample> drumSampleList;
+        List<XmlSample> drumSampleList;
 
         try
         {
@@ -53,7 +53,7 @@ public static class DrumRackAdgProcessor
                 using var fs = new FileStream(sourcePath, FileMode.Open, FileAccess.Read);
                 using var gZipStream = new GZipStream(fs, CompressionMode.Decompress);
 
-                drumSampleList = DrumRackAdgProcessor.ExtractDrumSamplesFromXml(gZipStream);
+                drumSampleList = DrumRackAdgProcessor.ExtractDrumSamplesFromXml(gZipStream).ToList();
             }
             else
             {
@@ -61,7 +61,7 @@ public static class DrumRackAdgProcessor
                 Console.WriteLine("The file is not compressed. Processing as XML...");
 
                 using var xmlFileStream = new FileStream(sourcePath, FileMode.Open, FileAccess.Read);
-                drumSampleList = DrumRackAdgProcessor.ExtractDrumSamplesFromXml(xmlFileStream);
+                drumSampleList = DrumRackAdgProcessor.ExtractDrumSamplesFromXml(xmlFileStream).ToList();
             }
         }
         catch (Exception ex)
@@ -78,37 +78,60 @@ public static class DrumRackAdgProcessor
             return processResult.Set(ProcessResult.ValueEnum.SamplesNotFound);
         }
         
-        var drumSampleListGroup = drumSampleList.GroupBy(_ => _.ReceivingNote).Select(_ => _.ToList());
+        // Distinct samples by their note
+        var distinctSampleList = new List<IEnumerable<XmlSample>>();
+        while (drumSampleList.Any())
+        {
+            var newKit = new HashSet<XmlSample>(drumSampleList.DistinctBy(_ => _.ReceivingNote));
+            distinctSampleList.Add(newKit);
+            
+            drumSampleList.RemoveAll(_ => newKit.Contains(_));
+        }
 
-        var fileName = Path.GetFileName(sourcePath);
+        string fileName;
         
         // Single samples file
-        if (drumSampleListGroup.Count() <= 1)
+        if (distinctSampleList.Count() <= 1)
         {
-            var result = DrumRackAdgProcessor.WriteAdg(xmlSourceTemplate, drumSampleList, targetPath, fileName);
-            if (result)
-            {
-                return new SamplesProcessResult(processResult).Set(ProcessResult.ValueEnum.Ok, drumSampleList);
-            }
+            fileName = Path.GetFileName(sourcePath);
+
+            var result = DrumRackAdgProcessor.WriteAdg(xmlSourceTemplate, distinctSampleList[0], targetPath, fileName);
             
-            return processResult.Set(ProcessResult.ValueEnum.GenericError);
+            return result
+                ? new SamplesProcessResult(processResult).Set(ProcessResult.ValueEnum.Ok, drumSampleList) 
+                : processResult.Set(ProcessResult.ValueEnum.GenericError);
         }
         
         // Multi samples file
-        var count = 1;
-        var groupCount = drumSampleListGroup.Count();
+        fileName = Path.GetFileNameWithoutExtension(sourcePath);
         
-        foreach (var group in drumSampleListGroup)
+        var count = 1;
+        var success = false;
+        var multiSampleList = new Dictionary<string, IEnumerable<Sample>>();       
+        foreach (var kit in distinctSampleList)
         {
-            if (groupCount > 1)
+            // At least four samples to create a new kit
+            if (kit.Count() < 4)
             {
-                fileName = $"{fileName} - Kit {count}";
+                continue;
             }
-
-            count++;
             
-            // TODO: ...
+            var fileNameKit = $"{fileName} - Kit {count}";
+            
+            success = DrumRackAdgProcessor.WriteAdg(xmlSourceTemplate, kit, targetPath, $"{fileNameKit}.adg");
+            if (!success)
+            {
+                continue;
+            }
+            
+            multiSampleList.Add(fileNameKit, kit);
+            
+            count++;
         }
+        
+        return success 
+            ? new MultiSampleProcessResult(processResult).Set(ProcessResult.ValueEnum.Ok, multiSampleList)
+            : processResult.Set(ProcessResult.ValueEnum.GenericError);
     }
 
     private static IEnumerable<XmlSample> ExtractDrumSamplesFromXml(Stream xmlStream)
@@ -177,8 +200,8 @@ public static class DrumRackAdgProcessor
 
     private static bool WriteAdg(XDocument xmlSourceTemplate,
                                  IEnumerable<XmlSample> drumSampleList,
-                                 string fileName,
-                                 string targetPath)
+                                 string targetPath,
+                                 string fileName)
     {
         // Copy the template to preserve the source one
         var xmlTemplate = new XDocument(xmlSourceTemplate);

@@ -14,7 +14,7 @@ public sealed class SamplesProcessResult : ProcessResult
     
     public IEnumerable<Sample> SampleList { get; set; }
     
-    public SamplesProcessResult Set(ValueEnum value, IEnumerable<Sample> sampleList = null)
+    public SamplesProcessResult Set(ValueEnum value, IEnumerable<Sample> sampleList)
     {
         this.Value = value;
         this.SampleList = sampleList;

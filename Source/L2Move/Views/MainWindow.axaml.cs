@@ -189,17 +189,18 @@ public partial class MainWindow : Window
 
         if (this.PresetBundleCheckbox.IsChecked ?? false)
         {
-            foreach (var processingOk in processOkList)
-            {
-                var presetName = Path.GetFileNameWithoutExtension(processingOk.SourceFileName);
-                
-                // Ordering based on notes, so on pads
-                var samplePathList = processingOk.SampleList.OrderByDescending(_ => _.ReceivingNote)
-                                                            .Select(_ => _.Path);
-                
-                // TODO: feedback error to user
-                await Task.Run(() => MovePresetManager.GenerateDrumKit(presetName, samplePathList, targetPath));
-            }
+            // TODO: restore
+            // foreach (var processingOk in processOkList)
+            // {
+            //     var presetName = Path.GetFileNameWithoutExtension(processingOk.SourceFileName);
+            //     
+            //     // Ordering based on notes, so on pads
+            //     var samplePathList = processingOk.SampleList.OrderByDescending(_ => _.ReceivingNote)
+            //                                                 .Select(_ => _.Path);
+            //     
+            //     // TODO: feedback error to user
+            //     await Task.Run(() => MovePresetManager.GenerateDrumKit(presetName, samplePathList, targetPath));
+            // }
         }
         
         await animatedCts.CancelAsync();
