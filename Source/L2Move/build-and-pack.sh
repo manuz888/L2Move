@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Build for both x64
+# Build for x64
 dotnet publish -r osx-x64 -c Release
 
 # Create dir and structure
