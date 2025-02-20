@@ -189,18 +189,26 @@ public partial class MainWindow : Window
 
         if (this.PresetBundleCheckbox.IsChecked ?? false)
         {
-            // TODO: restore
-            // foreach (var processingOk in processOkList)
-            // {
-            //     var presetName = Path.GetFileNameWithoutExtension(processingOk.SourceFileName);
-            //     
-            //     // Ordering based on notes, so on pads
-            //     var samplePathList = processingOk.SampleList.OrderByDescending(_ => _.ReceivingNote)
-            //                                                 .Select(_ => _.Path);
-            //     
-            //     // TODO: feedback error to user
-            //     await Task.Run(() => MovePresetManager.GenerateDrumKit(presetName, samplePathList, targetPath));
-            // }
+            string presetName;
+            foreach (var processingOk in processOkList)
+            {
+                if (processingOk is SamplesProcessResult samplesProcessResultOk)
+                {
+                    presetName = Path.GetFileNameWithoutExtension(samplesProcessResultOk.SourceFileName);
+
+                    await this.CreatePresetAsync(presetName, samplesProcessResultOk.SampleList, targetPath);
+
+                    continue;
+                }
+
+                var multiSamplesProcessResultOk = processingOk as MultiSamplesProcessResult;
+                foreach (var multiSamplesTuple in multiSamplesProcessResultOk.MultiSampleList)
+                {
+                    presetName = multiSamplesTuple.Key;
+                    
+                    await this.CreatePresetAsync(presetName, multiSamplesTuple.Value, targetPath);
+                }
+            }
         }
         
         await animatedCts.CancelAsync();
@@ -227,6 +235,16 @@ public partial class MainWindow : Window
             this.ResultBlockLabel.Text = RESULT_ERROR_STRING;
             this.ResultBlock.Background = Brushes.LightCoral;
         }
+    }
+
+    // TODO: feedback error to user
+    private async Task CreatePresetAsync(string presetName, IEnumerable<Sample> sampleList, string targetPath)
+    {
+        // Ordering based on notes, so on pads
+        var samplePathList = sampleList.OrderByDescending(_ => _.ReceivingNote)
+                                        .Select(_ => _.Path);
+        
+        await Task.Run(() => MovePresetManager.GenerateDrumKit(presetName, samplePathList, targetPath));
     }
     
     private async Task AnimateButtonText(Button button, string text, CancellationToken token)

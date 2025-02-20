@@ -26,13 +26,10 @@
                        Margin="0,8,0,0">
                 > Credits
                 <ToolTip.Tip>
-                    <StackPanel Width="200">
+                    <StackPanel>
                         <TextBlock TextAlignment="Left" FontSize="11">
-                            Dev: Manuele Nerucci<LineBreak/>
+                            Development: Manuz<LineBreak/>
                             Font: Val Kalinic
-                            <LineBreak/><LineBreak/>
-                            Thanks to:<LineBreak/>
-                            Charles Vestal and other guys for amazing work on extending Move
                         </TextBlock>
                     </StackPanel>
                 </ToolTip.Tip>

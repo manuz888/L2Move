@@ -130,7 +130,7 @@ public static class DrumRackAdgProcessor
         }
         
         return success 
-            ? new MultiSampleProcessResult(processResult).Set(ProcessResult.ValueEnum.Ok, multiSampleList)
+            ? new MultiSamplesProcessResult(processResult).Set(ProcessResult.ValueEnum.Ok, multiSampleList)
             : processResult.Set(ProcessResult.ValueEnum.GenericError);
     }
 

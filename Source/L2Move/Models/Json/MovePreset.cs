@@ -154,6 +154,7 @@ public sealed class MovePreset
     public class Send
     {
         public bool IsEnabled { get; set; }
+        
         public double Amount { get; set; }
     }
 
@@ -163,6 +164,7 @@ public sealed class MovePreset
         
         public int SendingNote { get; set; }
         
+        [AlwaysInclude]
         public int? ChokeGroup { get; set; }
     }
     
