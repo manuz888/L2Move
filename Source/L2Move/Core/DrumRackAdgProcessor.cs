@@ -78,12 +78,12 @@ public static class DrumRackAdgProcessor
             return processResult.Set(ProcessResult.ValueEnum.SamplesNotFound);
         }
         
-        // Distinct samples by their note
-        var distinctSampleList = new List<IEnumerable<XmlSample>>();
+        // Create a kit by distinct samples based on their note
+        var sampleKitList = new List<IEnumerable<XmlSample>>();
         while (drumSampleList.Any())
         {
             var newKit = new HashSet<XmlSample>(drumSampleList.DistinctBy(_ => _.ReceivingNote));
-            distinctSampleList.Add(newKit);
+            sampleKitList.Add(newKit);
             
             drumSampleList.RemoveAll(_ => newKit.Contains(_));
         }
@@ -91,46 +91,47 @@ public static class DrumRackAdgProcessor
         string fileName;
         
         // Single samples file
-        if (distinctSampleList.Count() <= 1)
+        if (sampleKitList.Count() <= 1)
         {
             fileName = Path.GetFileName(sourcePath);
 
-            var result = DrumRackAdgProcessor.WriteAdg(xmlSourceTemplate, distinctSampleList[0], targetPath, fileName);
+            var result = DrumRackAdgProcessor.WriteAdg(xmlSourceTemplate, sampleKitList[0], targetPath, fileName);
             
             return result
-                ? new SamplesProcessResult(processResult).Set(ProcessResult.ValueEnum.Ok, drumSampleList) 
+                ? new SamplesProcessResult(processResult).Set(ProcessResult.ValueEnum.Ok, sampleKitList[0]) 
                 : processResult.Set(ProcessResult.ValueEnum.GenericError);
         }
         
         // Multi samples file
         fileName = Path.GetFileNameWithoutExtension(sourcePath);
+        var extension = Path.GetExtension(sourcePath);
         
         var count = 1;
         var success = false;
-        var multiSampleList = new Dictionary<string, IEnumerable<Sample>>();       
-        foreach (var kit in distinctSampleList)
+        var multiSamplesList = new Dictionary<string, IEnumerable<Sample>>();       
+        foreach (var sampleKit in sampleKitList)
         {
-            // At least four samples to create a new kit
-            if (kit.Count() < 4)
+            // At least four samples for a valid kit
+            if (sampleKit.Count() < 4)
             {
                 continue;
             }
             
-            var fileNameKit = $"{fileName} - Kit {count}";
+            var fileNameSampleKit = $"{fileName} - Kit {count}{extension}";
             
-            success = DrumRackAdgProcessor.WriteAdg(xmlSourceTemplate, kit, targetPath, $"{fileNameKit}.adg");
+            success = DrumRackAdgProcessor.WriteAdg(xmlSourceTemplate, sampleKit, targetPath, fileNameSampleKit);
             if (!success)
             {
                 continue;
             }
             
-            multiSampleList.Add(fileNameKit, kit);
+            multiSamplesList.Add(fileNameSampleKit, sampleKit);
             
             count++;
         }
         
         return success 
-            ? new MultiSamplesProcessResult(processResult).Set(ProcessResult.ValueEnum.Ok, multiSampleList)
+            ? new MultiSamplesProcessResult(processResult).Set(ProcessResult.ValueEnum.Ok, multiSamplesList)
             : processResult.Set(ProcessResult.ValueEnum.GenericError);
     }
 

@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
@@ -71,5 +72,47 @@ public static class FileHelper
 
         return fileHeader[0] == GZIP_SIGNATURE[0] &&
                fileHeader[1] == GZIP_SIGNATURE[1];
+    }
+    
+    public static string CombineFromCommonPath(string absolutePath, string relativePath)
+    {
+        var relativePathList = relativePath.Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
+        var absolutePathList = absolutePath.Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
+
+        // Find the first common folder
+        var endAbsolute = -1;
+        var startRelative = -1;
+
+        for (var i = 0; i < absolutePathList.Length; i++)
+        {
+            for (var j = 0; j < relativePathList.Length; j++)
+            {
+                if (!absolutePathList[i].Equals(relativePathList[j], StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+                
+                endAbsolute = i;
+                startRelative = j;
+                
+                break;
+            }
+
+            if (endAbsolute != -1)
+            {
+                break;
+            }
+        }
+
+        // No common folder found
+        if (endAbsolute == -1)
+        {
+            return string.Empty;
+        }
+
+        relativePath = string.Join(Path.DirectorySeparatorChar, relativePathList[(startRelative + 1)..]);
+        absolutePath = Path.Combine(string.Join(Path.DirectorySeparatorChar, absolutePathList[..(endAbsolute + 1)]), relativePath);
+
+        return $"{Path.DirectorySeparatorChar}{absolutePath}";
     }
 }

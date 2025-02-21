@@ -196,7 +196,10 @@ public partial class MainWindow : Window
                 {
                     presetName = Path.GetFileNameWithoutExtension(samplesProcessResultOk.SourceFileName);
 
-                    await this.CreatePresetAsync(presetName, samplesProcessResultOk.SampleList, targetPath);
+                    await this.CreatePresetAsync(presetName,
+                                                 samplesProcessResultOk.SampleList,
+                                                 targetPath,
+                                                 processingOk.SourceFilePath);
 
                     continue;
                 }
@@ -204,9 +207,12 @@ public partial class MainWindow : Window
                 var multiSamplesProcessResultOk = processingOk as MultiSamplesProcessResult;
                 foreach (var multiSamplesTuple in multiSamplesProcessResultOk.MultiSampleList)
                 {
-                    presetName = multiSamplesTuple.Key;
+                    presetName = Path.GetFileNameWithoutExtension(multiSamplesTuple.Key);
                     
-                    await this.CreatePresetAsync(presetName, multiSamplesTuple.Value, targetPath);
+                    await this.CreatePresetAsync(presetName,
+                                                 multiSamplesTuple.Value,
+                                                 targetPath,
+                                                 processingOk.SourceFilePath);
                 }
             }
         }
@@ -238,13 +244,16 @@ public partial class MainWindow : Window
     }
 
     // TODO: feedback error to user
-    private async Task CreatePresetAsync(string presetName, IEnumerable<Sample> sampleList, string targetPath)
+    private async Task CreatePresetAsync(string presetName,
+                                         IEnumerable<Sample> sampleList,
+                                         string targetPath,
+                                         string sourcePath)
     {
         // Ordering based on notes, so on pads
         var samplePathList = sampleList.OrderByDescending(_ => _.ReceivingNote)
                                         .Select(_ => _.Path);
         
-        await Task.Run(() => MovePresetManager.GenerateDrumKit(presetName, samplePathList, targetPath));
+        await Task.Run(() => MovePresetManager.GenerateDrumKit(presetName, samplePathList, targetPath, sourcePath));
     }
     
     private async Task AnimateButtonText(Button button, string text, CancellationToken token)

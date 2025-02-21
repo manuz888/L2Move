@@ -6,6 +6,7 @@ using System.Collections.Generic;
 
 using Newtonsoft.Json;
 
+using L2Move.Helpers;
 using L2Move.Core.Json;
 using L2Move.Models.Json;
 
@@ -25,7 +26,10 @@ public static class MovePresetManager
     };
     
     // ! The order on drum sample list will define the related pad 
-    public static bool GenerateDrumKit(string presetName, IEnumerable<string> drumSampleList, string targetPath)
+    public static bool GenerateDrumKit(string presetName,
+                                       IEnumerable<string> drumSampleList,
+                                       string targetPath,
+                                       string sourcePath = null)
     {
         if (string.IsNullOrWhiteSpace(presetName) ||
             string.IsNullOrWhiteSpace(targetPath) ||
@@ -69,8 +73,24 @@ public static class MovePresetManager
                 }
                 else
                 {
-                    // Something goes wrong
-                    throw new FileNotFoundException($"The file {drumSample} was not found.");
+                    var copied = false;
+                    
+                    // Try the way to combine path
+                    if (!string.IsNullOrEmpty(sourcePath))
+                    {
+                        var fallbackDrumSample = FileHelper.CombineFromCommonPath(sourcePath, drumSample);
+                        if (File.Exists(fallbackDrumSample))
+                        {
+                            File.Copy(fallbackDrumSample, destinationFile, overwrite: true);
+                            
+                            copied = true;
+                        }
+                    }
+
+                    if (!copied)
+                    {
+                        throw new FileNotFoundException($"The file {drumSample} was not found.");
+                    }
                 }
             }
 
