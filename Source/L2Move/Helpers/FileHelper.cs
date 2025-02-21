@@ -1,7 +1,9 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 using Avalonia.Input;
 
@@ -114,5 +116,37 @@ public static class FileHelper
         absolutePath = Path.Combine(string.Join(Path.DirectorySeparatorChar, absolutePathList[..(endAbsolute + 1)]), relativePath);
 
         return $"{Path.DirectorySeparatorChar}{absolutePath}";
+    }
+    
+    public static bool HexToPath(string hex, out string path)
+    {
+        path = default;
+        
+        // Clean the hex from tab, space, etc
+        hex = Regex.Replace(hex, @"\s+", "");
+        
+        var sb = new StringBuilder();
+        for (var i = 0; i < hex.Length - 1; i += 2)
+        {
+            var part = hex.Substring(i, 2);
+            var num = Convert.ToInt32(part, 16);
+
+            // Consider only readable characters
+            if (num >= 32 && num <= 126)
+            {
+                sb.Append((char)num);
+            }
+        }
+        
+        // Search for possible file paths
+        var matches = Regex.Matches(sb.ToString(), @"(/[\w/\-\. ]+\.\w{3,4})");
+        if (matches.Count <= 0)
+        {
+            return false;
+        }
+
+        path = matches[0].Value;
+        
+        return true;
     }
 }

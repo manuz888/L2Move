@@ -39,38 +39,8 @@ public static class DrumRackAdgProcessor
         {
             return processResult.Set(ProcessResult.ValueEnum.GenericError);
         }
-        
-        List<XmlSample> drumSampleList;
 
-        try
-        {
-            // Check if the ADG file is compressed (GZIP)
-            if (FileHelper.IsGZipFile(sourcePath))
-            {
-                Console.WriteLine("The file is compressed. Extracting in memory...");
-
-                // Open the ADG file as a FileStream and process it as a ZIP archive in memory
-                using var fs = new FileStream(sourcePath, FileMode.Open, FileAccess.Read);
-                using var gZipStream = new GZipStream(fs, CompressionMode.Decompress);
-
-                drumSampleList = DrumRackAdgProcessor.ExtractDrumSamplesFromXml(gZipStream).ToList();
-            }
-            else
-            {
-                // If not compressed, assume the file is an XML file
-                Console.WriteLine("The file is not compressed. Processing as XML...");
-
-                using var xmlFileStream = new FileStream(sourcePath, FileMode.Open, FileAccess.Read);
-                drumSampleList = DrumRackAdgProcessor.ExtractDrumSamplesFromXml(xmlFileStream).ToList();
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("An error occurred: " + ex.Message);
-
-            return processResult.Set(ProcessResult.ValueEnum.GenericError);
-        }
-
+        var drumSampleList = DrumRackAdgProcessor.ExtractDrumSamplesFromFile(sourcePath).ToList();
         if ((drumSampleList?.Count() ?? 0) <= 0)
         {
             Console.WriteLine($"No drum samples found on {Path.GetFileName(sourcePath)}");
@@ -135,19 +105,39 @@ public static class DrumRackAdgProcessor
             : processResult.Set(ProcessResult.ValueEnum.GenericError);
     }
 
-    private static IEnumerable<XmlSample> ExtractDrumSamplesFromXml(Stream xmlStream)
+    private static IEnumerable<XmlSample> ExtractDrumSamplesFromFile(string sourcePath)
     {
+        FileStream fileStream = null;
+        Stream xmlStream = null;
+
         try
         {
+            // Check if the file is compressed (GZIP)
+            if (FileHelper.IsGZipFile(sourcePath))
+            {
+                Console.WriteLine("The file is compressed. Extracting in memory...");
+
+                // Open the ADG file as a FileStream and process it as a ZIP archive in memory
+                fileStream = new FileStream(sourcePath, FileMode.Open, FileAccess.Read);
+                xmlStream = new GZipStream(fileStream, CompressionMode.Decompress);
+            }
+            else
+            {
+                // If not compressed, assume the file is an XML file
+                Console.WriteLine("The file is not compressed. Processing as XML...");
+
+                xmlStream = new FileStream(sourcePath, FileMode.Open, FileAccess.Read);
+            }
+
             // Find all DrumBranchPreset elements in the stream
             var drumBranchPresetList = XDocument.Load(xmlStream).Descendants("DrumBranchPreset");
-            
+
             var drumSampleList = new List<XmlSample>();
             foreach (var drumBranchPreset in drumBranchPresetList)
             {
                 // Get the current branch ID, otherwise a string empty
                 var drumBranchId = drumBranchPreset.Attribute("Id")?.Value ?? string.Empty;
-                
+
                 // Get receiving note for the current branch
                 var receivingNote = drumBranchPreset.Element("ZoneSettings")
                     ?.Element("ReceivingNote")
@@ -157,7 +147,7 @@ public static class DrumRackAdgProcessor
                 {
                     continue;
                 }
-                
+
                 // Search for a SampleRef elements anywhere within the current branch
                 var sampleRefElementList = drumBranchPreset.Descendants("SampleRef");
                 foreach (var sampleRefElement in sampleRefElementList)
@@ -167,15 +157,31 @@ public static class DrumRackAdgProcessor
                     {
                         continue;
                     }
-                    
+
                     // Get path for the current SampleRef element 
                     var path = sampleRefElement.Element("FileRef")
                         ?.Element("Path")
                         ?.Attribute("Value")?.Value;
 
-                    if (string.IsNullOrEmpty(receivingNote) || string.IsNullOrEmpty(path))
+                    // Trying to search hex path on data
+                    if (string.IsNullOrEmpty(path))
                     {
-                        continue;
+                        var data = sampleRefElement.Element("FileRef")
+                            ?.Element("Data")
+                            ?.Value;
+
+                        if (string.IsNullOrEmpty(data) || !FileHelper.HexToPath(data, out var fallBackPath))
+                        {
+                            continue;
+                        }
+
+                        fallBackPath = FileHelper.CombineFromCommonPath(sourcePath, fallBackPath);
+                        if (!File.Exists(fallBackPath))
+                        {
+                            continue;
+                        }
+
+                        path = fallBackPath;
                     }
 
                     // Add the default id for safe
@@ -188,7 +194,7 @@ public static class DrumRackAdgProcessor
                     drumSampleList.Add(new XmlSample(drumBranchId, sampleRefElement, receivingNote, path));
                 }
             }
-            
+
             return drumSampleList;
         }
         catch (Exception ex)
@@ -196,6 +202,11 @@ public static class DrumRackAdgProcessor
             Console.WriteLine("Error processing ADG XML: " + ex.Message);
 
             return new List<XmlSample>();
+        }
+        finally
+        {
+            fileStream?.Dispose();
+            xmlStream?.Dispose();
         }
     }
 
