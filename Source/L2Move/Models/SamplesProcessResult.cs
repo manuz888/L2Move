@@ -14,10 +14,11 @@ public sealed class SamplesProcessResult : ProcessResult
     
     public IEnumerable<Sample> SampleList { get; set; }
     
-    public SamplesProcessResult Set(ValueEnum value, IEnumerable<Sample> sampleList)
+    public SamplesProcessResult Set(Value adgValue, IEnumerable<Sample> sampleList, Value? presetValue = null)
     {
-        this.Value = value;
         this.SampleList = sampleList;
+        
+        _ = base.Set(adgValue, presetValue);
 
         return this;
     }

@@ -15,10 +15,13 @@ public sealed class MultiSamplesProcessResult : ProcessResult
     // <FileName, SampleList>
     public Dictionary<string, IEnumerable<Sample>> MultiSampleList { get; set; }
     
-    public MultiSamplesProcessResult Set(ValueEnum value, Dictionary<string, IEnumerable<Sample>> multiSampleList)
+    public MultiSamplesProcessResult Set(Value adgValue,
+                                         Dictionary<string, IEnumerable<Sample>> multiSampleList,
+                                         Value? presetValue = null)
     {
-        this.Value = value;
         this.MultiSampleList = multiSampleList;
+
+        _ = base.Set(adgValue, presetValue);
 
         return this;
     }

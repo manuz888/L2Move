@@ -173,7 +173,7 @@ public partial class MainWindow : Window
             ReportGenerator.Generate(processResultList, Path.Combine(targetPath, REPORT_FILE_NAME));
         }
 
-        var processOkList = processResultList.Where(_ => _.Value == ProcessResult.ValueEnum.Ok);
+        var processOkList = processResultList.Where(_ => _.AdgValue == ProcessResult.Value.Ok);
         if (processOkList.Count() == _sourcePathList.Count)
         {
             this.ManageResult(isOk: true);

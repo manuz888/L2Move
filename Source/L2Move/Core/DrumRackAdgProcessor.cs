@@ -37,7 +37,7 @@ public static class DrumRackAdgProcessor
         
         if (string.IsNullOrEmpty(sourcePath) || string.IsNullOrEmpty(targetPath) || xmlSourceTemplate == null)
         {
-            return processResult.Set(ProcessResult.ValueEnum.GenericError);
+            return processResult.Set(ProcessResult.Value.GenericError);
         }
 
         var drumSampleList = DrumRackAdgProcessor.ExtractDrumSamplesFromFile(sourcePath).ToList();
@@ -45,7 +45,7 @@ public static class DrumRackAdgProcessor
         {
             Console.WriteLine($"No drum samples found on {Path.GetFileName(sourcePath)}");
             
-            return processResult.Set(ProcessResult.ValueEnum.SamplesNotFound);
+            return processResult.Set(ProcessResult.Value.SamplesNotFound);
         }
         
         // Create a kit by distinct samples based on their note
@@ -68,8 +68,8 @@ public static class DrumRackAdgProcessor
             var result = DrumRackAdgProcessor.WriteAdg(xmlSourceTemplate, sampleKitList[0], targetPath, fileName);
             
             return result
-                ? new SamplesProcessResult(processResult).Set(ProcessResult.ValueEnum.Ok, sampleKitList[0]) 
-                : processResult.Set(ProcessResult.ValueEnum.GenericError);
+                ? new SamplesProcessResult(processResult).Set(ProcessResult.Value.Ok, sampleKitList[0]) 
+                : processResult.Set(ProcessResult.Value.GenericError);
         }
         
         // Multi samples file
@@ -101,8 +101,8 @@ public static class DrumRackAdgProcessor
         }
         
         return success 
-            ? new MultiSamplesProcessResult(processResult).Set(ProcessResult.ValueEnum.Ok, multiSamplesList)
-            : processResult.Set(ProcessResult.ValueEnum.GenericError);
+            ? new MultiSamplesProcessResult(processResult).Set(ProcessResult.Value.Ok, multiSamplesList)
+            : processResult.Set(ProcessResult.Value.GenericError);
     }
 
     private static IEnumerable<XmlSample> ExtractDrumSamplesFromFile(string sourcePath)

@@ -11,11 +11,11 @@ namespace L2Move.Core;
 public static class ReportGenerator
 {
     #region Constants
+    
+    private const string HEADER_TEXT = "L2MOVE PROCESSING REPORT";
 
     private const string FILE_NAME_COLUMN = "File Name";
     private const string STATUS_COLUMN = "Status";
-    
-    private const string HEADER_TEXT = "FILE PROCESSING REPORT";
 
     private const int SPACING = 10;    
     
@@ -33,7 +33,7 @@ public static class ReportGenerator
         var generatedLine = $"Generated on: {DateTime.Now}";
         
         var maxFileNameLength = Math.Max(FILE_NAME_COLUMN.Length, resultList.Max(f => f.SourceFileName.Length));
-        var maxStatusLength = Math.Max(STATUS_COLUMN.Length, resultList.Max(f => f.ValueString.Length));
+        var maxStatusLength = Math.Max(STATUS_COLUMN.Length, resultList.Max(f => f.AdgValueString.Length));
 
         var totalWidth = maxFileNameLength + maxStatusLength + SPACING;
         totalWidth = Math.Max(totalWidth, generatedLine.Length);
@@ -56,7 +56,7 @@ public static class ReportGenerator
 
         foreach (var result in resultList)
         {
-            reportContent.AppendLine($"{result.SourceFileName.PadRight(maxFileNameLength + SPACING)}{result.ValueString.PadRight(maxStatusLength)}");
+            reportContent.AppendLine($"{result.SourceFileName.PadRight(maxFileNameLength + SPACING)}{result.AdgValueString.PadRight(maxStatusLength)}");
         }
         
         reportContent.AppendLine(new string('=', totalWidth));

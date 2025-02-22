@@ -1,4 +1,4 @@
-using System;
+using System.Collections.Generic;
 
 namespace L2Move.Models;
 
@@ -6,7 +6,7 @@ public class ProcessResult
 {
     #region Enums
     
-    public enum ValueEnum
+    public enum Value
     {
         Ok,
         GenericError,
@@ -16,6 +16,15 @@ public class ProcessResult
     }
 
     #endregion
+    
+    private static readonly Dictionary<Value, string> _valueStringMap = new()
+    {
+        { Value.Ok, "Ok" },
+        { Value.GenericError, "Generic error" },
+        
+        // Samples
+        { Value.SamplesNotFound, "Samples not found" }
+    };
    
     public ProcessResult(string sourceFilePath)
     {
@@ -24,26 +33,23 @@ public class ProcessResult
     
     public string SourceFilePath { get; }
     
-    public ValueEnum Value { get; protected set; }
+    public Value AdgValue { get; private set; }
+
+    public Value? PresetValue { get; protected set; }
 
     public string SourceFileName => System.IO.Path.GetFileName(this.SourceFilePath);
     
-    public string ValueString => this.Value switch
-    {
-        ValueEnum.Ok => "Ok",
-        ValueEnum.GenericError => "Generic error",
-        
-        // Samples
-        ValueEnum.SamplesNotFound => "Samples not Found",
-        
-        // Fallback
-        _ => throw new ArgumentOutOfRangeException()
-    };
-    
-    public ProcessResult Set(ValueEnum value)
-    {
-        this.Value = value;
+    public string AdgValueString => _valueStringMap.ContainsKey(this.AdgValue) ? _valueStringMap[this.AdgValue] : string.Empty;
 
+    public string PresetValueString => (this.PresetValue.HasValue && _valueStringMap.ContainsKey(this.PresetValue.Value)) 
+        ? _valueStringMap[this.PresetValue.Value] 
+        : string.Empty;
+    
+    public ProcessResult Set(Value adgValue, Value? presetValue = null)
+    {
+        this.AdgValue = adgValue;
+        this.PresetValue = presetValue;
+        
         return this;
     }
 }
