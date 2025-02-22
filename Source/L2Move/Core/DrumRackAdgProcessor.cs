@@ -265,9 +265,15 @@ public static class DrumRackAdgProcessor
                 Directory.CreateDirectory(targetPath);
             }
 
-            targetPath = Path.Combine(targetPath, fileName);
+            var fullTargetPath = Path.Combine(targetPath, fileName);
+            if (File.Exists(fullTargetPath))
+            {
+                fileName = FileHelper.GenerateNewFileName(fileName);
+                
+                fullTargetPath = Path.Combine(targetPath, fileName);
+            }
 
-            using var fileStream = new FileStream(targetPath, FileMode.Create, FileAccess.Write);
+            using var fileStream = new FileStream(fullTargetPath, FileMode.Create, FileAccess.Write);
             using var gzipStream = new GZipStream(fileStream, CompressionMode.Compress);
             using var writer = XmlWriter.Create(gzipStream, settings);
             xmlTemplate.Save(writer);

@@ -45,7 +45,7 @@ public static class MovePresetManager
         // If directory exists, append timestamp to create unique one
         if (File.Exists(presetBundlePath))
         {
-            presetName += "_" + DateTime.Now.ToString("yyyyMMdd-HHmmss");
+            presetName = FileHelper.GenerateNewFileName(presetName);
             
             presetDirectoryPath = Path.Combine(targetPath, presetName);
             presetBundlePath =  Path.Combine(targetPath, presetName + PRESET_BUNDLE_EXTENSION);

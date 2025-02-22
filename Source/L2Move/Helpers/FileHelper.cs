@@ -149,4 +149,12 @@ public static class FileHelper
         
         return true;
     }
+
+    public static string GenerateNewFileName(string fileName)
+    {
+        var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
+        var extension = Path.GetExtension(fileName);
+
+        return $"{fileNameWithoutExtension}_{GeneralHelper.GetLocalDateNow()}{extension}";
+    }
 }
