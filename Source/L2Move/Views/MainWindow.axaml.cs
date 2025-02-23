@@ -29,9 +29,9 @@ public partial class MainWindow : Window
     private const string REPORT_FILE_NAME = "report.txt";
     
     private const string RESULT_BLOCK_STRING = "> Result";
-    private static readonly string RESULT_BLOCK_OK_STRING = $"{RESULT_BLOCK_STRING}: Ok";
-    private static readonly string RESULT_BLOCK_WARNING_STRING = $"{RESULT_BLOCK_STRING}: Ok but see report";
-    private static readonly string RESULT_BLOCK_ERROR_STRING = $"{RESULT_BLOCK_STRING}: Error";
+    private const string RESULT_BLOCK_OK_STRING = $"{RESULT_BLOCK_STRING}: Ok";
+    private const string RESULT_BLOCK_WARNING_STRING = $"{RESULT_BLOCK_STRING}: Ok but see report";
+    private const string RESULT_BLOCK_ERROR_STRING = $"{RESULT_BLOCK_STRING}: Error";
     private static readonly List<Inline> RESULT_BLOCK_FOOTER_RUN =
     [
         new LineBreak(),
@@ -39,10 +39,7 @@ public partial class MainWindow : Window
     ];
 
     private const string PROCESSING_STRING = "Processing";
-
     private const string PREFIX_FOR_SOURCE_STRING = "> ";
-    private const string DIRECTORY_STRING = "Directory";
-    private const string FILE_STRING = "File";
 
     #endregion
     
@@ -126,16 +123,17 @@ public partial class MainWindow : Window
             return;
         }
         
-        var prefix = PREFIX_FOR_SOURCE_STRING;
+        var boxLabel = PREFIX_FOR_SOURCE_STRING;
+        var fileName = Path.GetFileName(path);
         if (File.Exists(path))
         {
-            prefix += FILE_STRING;
+            boxLabel += $"{fileName}";
             
             _sourcePathList = [path];
         }
         else if (Directory.Exists(path))
         {
-            prefix += DIRECTORY_STRING;
+            boxLabel += $"../{fileName}/";
             
             FileHelper.GetFilesFromPathByExtension(DRUM_RACK_LIVE_EXTENSION, path, out _sourcePathList);
         }
@@ -145,10 +143,10 @@ public partial class MainWindow : Window
             return;
         }
         
+        this.DropBoxBlock.Text = boxLabel;
+        
         this.ResultBlock.Opacity = 0;
         this.ProcessButton.IsEnabled = true;
-        
-        this.DropBoxBlock.Text = $"{prefix}:\n{Path.GetFileName(path)}";
     }
 
     private async void OnProcessClicked(object? sender, RoutedEventArgs e)
