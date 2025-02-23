@@ -15,9 +15,10 @@ public static class ReportGenerator
     private const string HEADER_TEXT = "L2MOVE PROCESSING REPORT";
 
     private const string FILE_NAME_COLUMN = "File Name";
-    private const string STATUS_COLUMN = "Status";
+    private const string ADG_STATUS_COLUMN = "Adg Status";
+    private const string PRESET_STATUS_COLUMN = "Preset Status";
 
-    private const int SPACING = 10;    
+    private const int SPACING = 10;
     
     #endregion
     
@@ -33,33 +34,40 @@ public static class ReportGenerator
         var generatedLine = $"Generated on: {DateTime.Now}";
         
         var maxFileNameLength = Math.Max(FILE_NAME_COLUMN.Length, resultList.Max(f => f.SourceFileName.Length));
-        var maxStatusLength = Math.Max(STATUS_COLUMN.Length, resultList.Max(f => f.AdgValueString.Length));
-
-        var totalWidth = maxFileNameLength + maxStatusLength + SPACING;
+        var maxAdgStatusLength = Math.Max(ADG_STATUS_COLUMN.Length, resultList.Max(f => f.AdgValueString.Length));
+        var maxPresetStatusLength = Math.Max(ADG_STATUS_COLUMN.Length, resultList.Max(f => f.PresetValueString.Length));
+        
+        var totalWidth = maxFileNameLength + SPACING + maxAdgStatusLength + SPACING + maxPresetStatusLength;
         totalWidth = Math.Max(totalWidth, generatedLine.Length);
         
-        var separatorLine = new string('=', totalWidth);
+        var thickSeparatorLine = new string('=', totalWidth);
+        var thinSeparatorLine = new string('-', totalWidth);
         
         var headerPadding = (totalWidth - HEADER_TEXT.Length) / 2;
         var centeredHeader = new string(' ', headerPadding) + HEADER_TEXT;
         
         var reportContent = new StringBuilder();
-        reportContent.AppendLine(new string('=', totalWidth));
+        
+        reportContent.AppendLine(thickSeparatorLine);
         reportContent.AppendLine(centeredHeader);
-        reportContent.AppendLine(new string('=', totalWidth));
+        reportContent.AppendLine(thickSeparatorLine);
         reportContent.AppendLine(generatedLine);
         reportContent.AppendLine();
         reportContent.AppendLine("Processed Files:");
-        reportContent.AppendLine(new string('-', totalWidth));
-        reportContent.AppendLine($"{FILE_NAME_COLUMN.PadRight(maxFileNameLength + SPACING)}{STATUS_COLUMN.PadRight(maxStatusLength)}");
-        reportContent.AppendLine(new string('-', totalWidth));
+        reportContent.AppendLine(thinSeparatorLine);
+        reportContent.AppendLine($"{FILE_NAME_COLUMN.PadRight(maxFileNameLength + SPACING)}" +
+                                 $"{ADG_STATUS_COLUMN.PadRight(maxAdgStatusLength + SPACING)}" +
+                                 $"{PRESET_STATUS_COLUMN}");
+        reportContent.AppendLine(thinSeparatorLine);
 
         foreach (var result in resultList)
         {
-            reportContent.AppendLine($"{result.SourceFileName.PadRight(maxFileNameLength + SPACING)}{result.AdgValueString.PadRight(maxStatusLength)}");
+            reportContent.AppendLine($"{result.SourceFileName.PadRight(maxFileNameLength + SPACING)}" +
+                                     $"{result.AdgValueString.PadRight(maxAdgStatusLength +SPACING)}" +
+                                     $"{result.PresetValueString}");
         }
         
-        reportContent.AppendLine(new string('=', totalWidth));
+        reportContent.AppendLine(thickSeparatorLine);
 
         try
         {

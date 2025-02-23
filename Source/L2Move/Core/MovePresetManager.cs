@@ -6,6 +6,7 @@ using System.Collections.Generic;
 
 using Newtonsoft.Json;
 
+using L2Move.Models;
 using L2Move.Helpers;
 using L2Move.Core.Json;
 using L2Move.Models.Json;
@@ -26,17 +27,19 @@ public static class MovePresetManager
     };
     
     // ! The order on drum sample list will define the related pad 
-    public static bool GenerateDrumKit(string presetName,
+    public static void GenerateDrumKit(string presetName,
                                        IEnumerable<string> drumSampleList,
                                        string targetPath,
-                                       string sourcePath = null)
+                                       ProcessResult processResult)
     {
         if (string.IsNullOrWhiteSpace(presetName) ||
             string.IsNullOrWhiteSpace(targetPath) ||
             !Directory.Exists(targetPath)         ||
             (drumSampleList?.Count() ?? 0) <= 0)
         {
-            return false;
+            processResult.PresetValue = ProcessResult.Value.GenericError;
+            
+            return;
         }
         
         var presetDirectoryPath = Path.Combine(targetPath, presetName);
@@ -76,9 +79,9 @@ public static class MovePresetManager
                     var copied = false;
                     
                     // Try the way to combine path
-                    if (!string.IsNullOrEmpty(sourcePath))
+                    if (!string.IsNullOrEmpty(processResult.SourceFilePath))
                     {
-                        var fallbackDrumSample = FileHelper.CombineFromCommonPath(sourcePath, drumSample);
+                        var fallbackDrumSample = FileHelper.CombineFromCommonPath(processResult.SourceFilePath, drumSample);
                         if (File.Exists(fallbackDrumSample))
                         {
                             File.Copy(fallbackDrumSample, destinationFile, overwrite: true);
@@ -106,10 +109,14 @@ public static class MovePresetManager
             
             Console.WriteLine($"Error: {ex.Message}");
 
-            return false;
+            processResult.PresetValue = ex is FileNotFoundException 
+                ? ProcessResult.Value.ErrorOnCopySamples 
+                : ProcessResult.Value.GenericError;
+
+            return;
         }
 
-        return true;
+        processResult.PresetValue = ProcessResult.Value.Ok;
     }
 
     private static MovePreset NewDrumRackPreset(string presetName, IEnumerable<string> drumSampleList)

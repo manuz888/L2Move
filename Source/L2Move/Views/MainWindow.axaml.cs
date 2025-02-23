@@ -166,13 +166,7 @@ public partial class MainWindow : Window
         
         var targetPath = Path.Combine(sourceDirectory, TARGET_DIRECTORY);
         var processResultList = await Task.Run(() => DrumRackAdgProcessor.Process(_sourcePathList, targetPath));
-
-        // If the source are multiple, so the report will be generated
-        if (_sourcePathList.Count > 1)
-        {
-            ReportGenerator.Generate(processResultList, Path.Combine(targetPath, REPORT_FILE_NAME));
-        }
-
+        
         var processOkList = processResultList.Where(_ => _.AdgValue == ProcessResult.Value.Ok);
         if (processOkList.Count() == _sourcePathList.Count)
         {
@@ -199,7 +193,7 @@ public partial class MainWindow : Window
                     await this.CreatePresetAsync(presetName,
                                                  samplesProcessResultOk.SampleList,
                                                  targetPath,
-                                                 processingOk.SourceFilePath);
+                                                 processingOk);
 
                     continue;
                 }
@@ -212,9 +206,15 @@ public partial class MainWindow : Window
                     await this.CreatePresetAsync(presetName,
                                                  multiSamplesTuple.Value,
                                                  targetPath,
-                                                 processingOk.SourceFilePath);
+                                                 processingOk);
                 }
             }
+        }
+        
+        // If the source are multiple, so the report will be generated
+        if (_sourcePathList.Count > 1)
+        {
+            ReportGenerator.Generate(processResultList, Path.Combine(targetPath, REPORT_FILE_NAME));
         }
         
         await animatedCts.CancelAsync();
@@ -243,17 +243,16 @@ public partial class MainWindow : Window
         }
     }
 
-    // TODO: feedback error to user
     private async Task CreatePresetAsync(string presetName,
                                          IEnumerable<Sample> sampleList,
                                          string targetPath,
-                                         string sourcePath)
+                                         ProcessResult processResult)
     {
         // Ordering based on notes, so on pads
         var samplePathList = sampleList.OrderByDescending(_ => _.ReceivingNote)
                                         .Select(_ => _.Path);
         
-        await Task.Run(() => MovePresetManager.GenerateDrumKit(presetName, samplePathList, targetPath, sourcePath));
+        await Task.Run(() => MovePresetManager.GenerateDrumKit(presetName, samplePathList, targetPath, processResult));
     }
     
     private async Task AnimateButtonText(Button button, string text, CancellationToken token)

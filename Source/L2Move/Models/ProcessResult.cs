@@ -4,6 +4,8 @@ namespace L2Move.Models;
 
 public class ProcessResult
 {
+    private const string PRESET_NULL_VALUE_TEXT = "Not processed";
+    
     #region Enums
     
     public enum Value
@@ -12,7 +14,8 @@ public class ProcessResult
         GenericError,
         
         // Samples
-        SamplesNotFound
+        SamplesNotFound,
+        ErrorOnCopySamples
     }
 
     #endregion
@@ -23,7 +26,8 @@ public class ProcessResult
         { Value.GenericError, "Generic error" },
         
         // Samples
-        { Value.SamplesNotFound, "Samples not found" }
+        { Value.SamplesNotFound, "Samples not found" },
+        { Value.ErrorOnCopySamples, "Error on copy samples" }
     };
    
     public ProcessResult(string sourceFilePath)
@@ -35,7 +39,7 @@ public class ProcessResult
     
     public Value AdgValue { get; private set; }
 
-    public Value? PresetValue { get; protected set; }
+    public Value? PresetValue { get; set; }
 
     public string SourceFileName => System.IO.Path.GetFileName(this.SourceFilePath);
     
@@ -43,12 +47,11 @@ public class ProcessResult
 
     public string PresetValueString => (this.PresetValue.HasValue && _valueStringMap.ContainsKey(this.PresetValue.Value)) 
         ? _valueStringMap[this.PresetValue.Value] 
-        : string.Empty;
+        : PRESET_NULL_VALUE_TEXT;
     
-    public ProcessResult Set(Value adgValue, Value? presetValue = null)
+    public ProcessResult Set(Value adgValue)
     {
         this.AdgValue = adgValue;
-        this.PresetValue = presetValue;
         
         return this;
     }
