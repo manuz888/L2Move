@@ -1,4 +1,3 @@
-using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -9,6 +8,7 @@ using Avalonia.Input;
 using Avalonia.Media;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Controls.Documents;
 
 using L2Move.Core;
 using L2Move.Models;
@@ -27,27 +27,34 @@ public partial class MainWindow : Window
 
     private const string DRUM_RACK_LIVE_EXTENSION = ".adg";
     private const string REPORT_FILE_NAME = "report.txt";
-
-    private const string RESULT_STRING = "Result";
-    private static readonly string RESULT_OK_STRING = $"{RESULT_STRING}: Ok";
-    private static readonly string RESULT_WARNING_STRING = $"{RESULT_STRING}: Ok but see report";
-    private static readonly string RESULT_ERROR_STRING = $"{RESULT_STRING}: Error";
+    
+    private const string RESULT_BLOCK_STRING = "> Result";
+    private static readonly string RESULT_BLOCK_OK_STRING = $"{RESULT_BLOCK_STRING}: Ok";
+    private static readonly string RESULT_BLOCK_WARNING_STRING = $"{RESULT_BLOCK_STRING}: Ok but see report";
+    private static readonly string RESULT_BLOCK_ERROR_STRING = $"{RESULT_BLOCK_STRING}: Error";
+    private static readonly List<Inline> RESULT_BLOCK_FOOTER_RUN =
+    [
+        new LineBreak(),
+        new Run() { Text = "(Click to open output folder)", FontSize = 10 }
+    ];
 
     private const string PROCESSING_STRING = "Processing";
 
-    private const string PREFIX_FOR_SOURCE = "> ";
+    private const string PREFIX_FOR_SOURCE_STRING = "> ";
     private const string DIRECTORY_STRING = "Directory";
     private const string FILE_STRING = "File";
 
     #endregion
     
     private List<string> _sourcePathList;
+    private string _targetPath;
     
     public MainWindow()
     {
         InitializeComponent();
-
+        
         this.ResultBlock.Opacity = 0;
+        this.ResultBlock.PointerPressed += (_, _) => OSHelper.OpenFolderInFinder(_targetPath);
         
         this.ProcessButton.IsEnabled = false;
         this.ProcessButton.Click += this.OnProcessClicked;
@@ -119,7 +126,7 @@ public partial class MainWindow : Window
             return;
         }
         
-        var prefix = PREFIX_FOR_SOURCE;
+        var prefix = PREFIX_FOR_SOURCE_STRING;
         if (File.Exists(path))
         {
             prefix += FILE_STRING;
@@ -167,11 +174,11 @@ public partial class MainWindow : Window
         var animatedCts = new CancellationTokenSource();
 
         var processButtonLabel = this.ProcessButton.Content;
-        _ = this.AnimateButtonText(this.ProcessButton, PROCESSING_STRING, animatedCts.Token);
+        _ = GeneralHelper.AnimateButtonText(this.ProcessButton, PROCESSING_STRING, animatedCts.Token);
         
-        var targetPath = Path.Combine(TARGET_PATH, $"{PROCESSED_DIRECTORY}_{GeneralHelper.GetDateNow()}");
+        _targetPath = Path.Combine(TARGET_PATH, $"{PROCESSED_DIRECTORY}_{GeneralHelper.GetDateNow()}");
         
-        var targetAdgPath = Path.Combine(targetPath, TARGET_ADG_DIRECTORY);
+        var targetAdgPath = Path.Combine(_targetPath, TARGET_ADG_DIRECTORY);
         var processResultList = await Task.Run(() => DrumRackAdgProcessor.Process(_sourcePathList, targetAdgPath));
         
         var processOkList = processResultList.Where(_ => _.AdgValue == ProcessResult.Value.Ok);
@@ -190,10 +197,11 @@ public partial class MainWindow : Window
 
         if (this.PresetBundleCheckbox.IsChecked ?? false)
         {
-            string presetName;
-            string targetPresetPath = Path.Combine(targetPath, TARGET_PRESET_DIRECTORY);
+            var targetPresetPath = Path.Combine(_targetPath, TARGET_PRESET_DIRECTORY);
             foreach (var processingOk in processOkList)
             {
+                string presetName;
+                
                 if (processingOk is SamplesProcessResult samplesProcessResultOk)
                 {
                     presetName = Path.GetFileNameWithoutExtension(samplesProcessResultOk.SourceFileName);
@@ -222,7 +230,7 @@ public partial class MainWindow : Window
         // If the source are multiple, so the report will be generated
         if (_sourcePathList.Count > 1)
         {
-            ReportGenerator.Generate(processResultList, Path.Combine(targetPath, REPORT_FILE_NAME));
+            ReportGenerator.Generate(processResultList, Path.Combine(_targetPath, REPORT_FILE_NAME));
         }
         
         await animatedCts.CancelAsync();
@@ -236,19 +244,23 @@ public partial class MainWindow : Window
     {
         if (isOk)
         {
-            this.ResultBlockLabel.Text = RESULT_OK_STRING;
+            this.ResultTextBlock.Text = RESULT_BLOCK_OK_STRING;
             this.ResultBlock.Background = Brushes.LightGreen;
         }
         else if (isWarning)
         {
-            this.ResultBlockLabel.Text = RESULT_WARNING_STRING;
+            this.ResultTextBlock.Text = RESULT_BLOCK_WARNING_STRING;
             this.ResultBlock.Background = Brushes.LightYellow;
         }
         else
         {
-            this.ResultBlockLabel.Text = RESULT_ERROR_STRING;
+            this.ResultTextBlock.Text = RESULT_BLOCK_ERROR_STRING;
             this.ResultBlock.Background = Brushes.LightCoral;
         }
+        
+        // Not used 'AddRange' to avoid overwriting the text above
+        this.ResultTextBlock.Inlines.Add(RESULT_BLOCK_FOOTER_RUN[0]);
+        this.ResultTextBlock.Inlines.Add(RESULT_BLOCK_FOOTER_RUN[1]);
     }
 
     private async Task CreatePresetAsync(string presetName,
@@ -258,22 +270,8 @@ public partial class MainWindow : Window
     {
         // Ordering based on notes, so on pads
         var samplePathList = sampleList.OrderByDescending(_ => _.ReceivingNote)
-                                        .Select(_ => _.Path);
+                                       .Select(_ => _.Path);
         
         await Task.Run(() => MovePresetManager.GenerateDrumKit(presetName, samplePathList, targetPath, processResult));
-    }
-    
-    private async Task AnimateButtonText(Button button, string text, CancellationToken token)
-    {
-        string[] animatedStates = [".", "..", "..."];
-        
-        var index = 0;
-        while (!token.IsCancellationRequested)
-        {
-            button.Content = text + animatedStates[index];
-            index = (index + 1) % animatedStates.Length;
-            
-            await Task.Delay(250, token); 
-        }
     }
 }
