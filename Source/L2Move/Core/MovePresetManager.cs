@@ -34,12 +34,16 @@ public static class MovePresetManager
     {
         if (string.IsNullOrWhiteSpace(presetName) ||
             string.IsNullOrWhiteSpace(targetPath) ||
-            !Directory.Exists(targetPath)         ||
             (drumSampleList?.Count() ?? 0) <= 0)
         {
             processResult.PresetValue = ProcessResult.Value.GenericError;
             
             return;
+        }
+
+        if (!Directory.Exists(targetPath))
+        {
+            Directory.CreateDirectory(targetPath);
         }
         
         var presetDirectoryPath = Path.Combine(targetPath, presetName);

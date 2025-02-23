@@ -157,4 +157,26 @@ public static class FileHelper
 
         return $"{fileNameWithoutExtension}_{GeneralHelper.GetLocalDateNow()}{extension}";
     }
+    
+    public static string GetAppBundlePath()
+    {
+        var exePath = AppContext.BaseDirectory;
+
+        #if DEBUG
+        return exePath;
+        #endif
+        
+        var directoryInfo = new DirectoryInfo(exePath);
+        while (directoryInfo != null)
+        {
+            if (directoryInfo.Name.EndsWith(".app", StringComparison.OrdinalIgnoreCase))
+            {
+                return directoryInfo.Parent.FullName;
+            }
+            
+            directoryInfo = directoryInfo.Parent;
+        }
+
+        return exePath;
+    }
 }

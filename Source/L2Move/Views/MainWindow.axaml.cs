@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -18,9 +19,13 @@ namespace L2Move.Views;
 public partial class MainWindow : Window
 {
     #region Constants
+    
+    private static readonly string TARGET_PATH = Path.Combine(FileHelper.GetAppBundlePath(), "L2Move Data");
+    private const string PROCESSED_DIRECTORY = "Processed";
+    private const string TARGET_ADG_DIRECTORY = "Adg";
+    private const string TARGET_PRESET_DIRECTORY = "Presets";
 
     private const string DRUM_RACK_LIVE_EXTENSION = ".adg";
-    private const string TARGET_DIRECTORY = "Processed";
     private const string REPORT_FILE_NAME = "report.txt";
 
     private const string RESULT_STRING = "Result";
@@ -164,8 +169,10 @@ public partial class MainWindow : Window
         var processButtonLabel = this.ProcessButton.Content;
         _ = this.AnimateButtonText(this.ProcessButton, PROCESSING_STRING, animatedCts.Token);
         
-        var targetPath = Path.Combine(sourceDirectory, TARGET_DIRECTORY);
-        var processResultList = await Task.Run(() => DrumRackAdgProcessor.Process(_sourcePathList, targetPath));
+        var targetPath = Path.Combine(TARGET_PATH, $"{PROCESSED_DIRECTORY}_{GeneralHelper.GetDateNow()}");
+        
+        var targetAdgPath = Path.Combine(targetPath, TARGET_ADG_DIRECTORY);
+        var processResultList = await Task.Run(() => DrumRackAdgProcessor.Process(_sourcePathList, targetAdgPath));
         
         var processOkList = processResultList.Where(_ => _.AdgValue == ProcessResult.Value.Ok);
         if (processOkList.Count() == _sourcePathList.Count)
@@ -184,6 +191,7 @@ public partial class MainWindow : Window
         if (this.PresetBundleCheckbox.IsChecked ?? false)
         {
             string presetName;
+            string targetPresetPath = Path.Combine(targetPath, TARGET_PRESET_DIRECTORY);
             foreach (var processingOk in processOkList)
             {
                 if (processingOk is SamplesProcessResult samplesProcessResultOk)
@@ -192,7 +200,7 @@ public partial class MainWindow : Window
 
                     await this.CreatePresetAsync(presetName,
                                                  samplesProcessResultOk.SampleList,
-                                                 targetPath,
+                                                 targetPresetPath,
                                                  processingOk);
 
                     continue;
@@ -205,7 +213,7 @@ public partial class MainWindow : Window
                     
                     await this.CreatePresetAsync(presetName,
                                                  multiSamplesTuple.Value,
-                                                 targetPath,
+                                                 targetPresetPath,
                                                  processingOk);
                 }
             }
