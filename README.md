@@ -15,7 +15,7 @@ L2Move **is not affiliated with, authorized by, or endorsed by Ableton**.
 - **Create preset bundles directly**.
 - **Batch conversion**: Process single files or entire directories.
 - **Drag & Drop + Copy & Paste** support.
-- **Supports multi-sample drum racks**: A new `.adg` file and preset bundle will be created for each kit inside.
+- **Supports multi-sample drum racks**: A new `.adg` file and/or preset bundle will be created for each kit inside.
 
 ## 🚀 Installation
 
@@ -41,7 +41,6 @@ The Windows build is **not yet available**, but it will be released in the futur
    - You can do this via **copy & paste** or **drag & drop**.
 3. **(Optional)** Check the box to choose whether to create the **preset bundle** for Move. Once the preset bundle is created, you can use **Move Manager** to transfer it to your device.
 4. **Start the process**.
-   - Once completed, the processed files will be located in the `Processed` folder within the selected directory.
 5. **For batch conversion**, a `report.txt` file will be generated containing details about the processing results.
 
 ⚠️ **If no samples are found**:
