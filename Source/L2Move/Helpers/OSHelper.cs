@@ -6,6 +6,9 @@ namespace L2Move.Helpers;
 
 public static class OSHelper
 {
+    /// <summary>
+    /// Open a folder in Finder on macOS (so far).
+    /// </summary>
     public static void OpenFolderInFinder(string path)
     {
         if (string.IsNullOrEmpty(path))

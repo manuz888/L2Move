@@ -21,18 +21,18 @@ public static class DrumRackAdgProcessor
     public static IEnumerable<ProcessResult> Process(List<string> sourcePathList, string targetPath)
     {
         var result = new List<ProcessResult>();
-        
-        var xmlSourceTemplate = XDocument.Load(DEFAULT_TEMPLATE_FILE_NAME);
         foreach (var sourcePath in sourcePathList)
         {
-            result.Add(DrumRackAdgProcessor.ProcessInternal(sourcePath, targetPath, xmlSourceTemplate));
+            result.Add(DrumRackAdgProcessor.ProcessInternal(sourcePath, targetPath));
         }
 
         return result;
     }
 
-    private static ProcessResult ProcessInternal(string sourcePath, string targetPath, XDocument xmlSourceTemplate)
+    private static ProcessResult ProcessInternal(string sourcePath, string targetPath)
     {
+        var xmlSourceTemplate = XDocument.Load(DEFAULT_TEMPLATE_FILE_NAME);
+
         var processResult = new ProcessResult(sourcePath);
         
         if (string.IsNullOrEmpty(sourcePath) || string.IsNullOrEmpty(targetPath) || xmlSourceTemplate == null)

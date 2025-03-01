@@ -19,8 +19,8 @@ namespace L2Move.Views;
 public partial class MainWindow : Window
 {
     #region Constants
-    
-    private static readonly string TARGET_PATH = Path.Combine(FileHelper.GetAppBundlePath(), "L2Move Data");
+
+    private static readonly string TARGET_PATH = FileHelper.GetDocumentsPath();
     private const string PROCESSED_DIRECTORY = "Processed";
     private const string TARGET_ADG_DIRECTORY = "Adg";
     private const string TARGET_PRESET_DIRECTORY = "Presets";

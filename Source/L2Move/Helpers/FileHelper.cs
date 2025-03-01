@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Text.RegularExpressions;
 
 using Avalonia.Input;
@@ -13,6 +14,9 @@ public static class FileHelper
 {
     private static readonly byte[] GZIP_SIGNATURE = [0x1F, 0x8B];
     
+    /// <summary>
+    /// Get all files from a path with a specific extension.
+    /// </summary>
     public static bool GetFilesFromPathByExtension(string extension, string path, out List<string> fileList)
     {
         if (!extension.StartsWith('.'))
@@ -25,6 +29,9 @@ public static class FileHelper
         return fileList.Count > 0;
     }
 
+    /// <summary>
+    /// Get the path from a drag event.
+    /// </summary>
     public static bool GetPathFromDragEvent(DragEventArgs eventArgs, out string path)
     {
         path = default;
@@ -50,6 +57,9 @@ public static class FileHelper
         return true;
     }
 
+    /// <summary>
+    /// Check if a path contains files with a specific extension.
+    /// </summary>
     public static bool ContainsFilesWithExtension(string path, string extension)
     {
         if (string.IsNullOrEmpty(path))
@@ -65,6 +75,9 @@ public static class FileHelper
         return Directory.Exists(path) && FileHelper.GetFilesFromPathByExtension(extension, path, out _);
     }
     
+    /// <summary>
+    /// Check if a file is a GZip file.
+    /// </summary>
     public static bool IsGZipFile(string filePath)
     {
         var fileHeader = new byte[2];
@@ -76,6 +89,9 @@ public static class FileHelper
                fileHeader[1] == GZIP_SIGNATURE[1];
     }
     
+    /// <summary>
+    /// Combine a relative path to an absolute path from the first common folder.
+    /// </summary>
     public static string CombineFromCommonPath(string absolutePath, string relativePath)
     {
         var relativePathList = relativePath.Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
@@ -118,6 +134,9 @@ public static class FileHelper
         return $"{Path.DirectorySeparatorChar}{absolutePath}";
     }
     
+    /// <summary>
+    /// Convert a hex string to a file path.
+    /// </summary>
     public static bool HexToPath(string hex, out string path)
     {
         path = default;
@@ -150,6 +169,9 @@ public static class FileHelper
         return true;
     }
 
+    /// <summary>
+    /// Generate a new file name with the current date.
+    /// </summary>
     public static string GenerateNewFileName(string fileName)
     {
         var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
@@ -158,7 +180,10 @@ public static class FileHelper
         return $"{fileNameWithoutExtension}_{GeneralHelper.GetLocalDateNow()}{extension}";
     }
     
-    public static string GetAppBundlePath()
+    /// <summary>
+    /// Get the app bundle directory on macOS.
+    /// </summary>
+    public static string GetAppBundleDirectory()
     {
         var exePath = AppContext.BaseDirectory;
 
@@ -178,5 +203,19 @@ public static class FileHelper
         }
 
         return exePath;
+    }
+    
+    /// <summary>
+    /// Get the documents path.
+    /// </summary>
+    public static string GetDocumentsPath()
+    {
+        // Get the application name dynamically from the assembly
+        var appName = Assembly.GetEntryAssembly()?.GetName().Name ?? "L2Move";
+
+        // Get the documents path
+        var appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
+        return Path.Combine(appDataPath, appName);
     }
 }
