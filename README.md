@@ -20,9 +20,9 @@ L2Move **is not affiliated with, authorized by, or endorsed by Ableton**.
 ## 🚀 Installation
 
 ### macOS
-A binary is available in the [releases](/releases), but since it is **not signed or notarized**, you will need to bypass Gatekeeper to open it. **I'm truly sorry for the inconvenience!**  
+A binary is available in the [releases](https://github.com/manuz888/L2Move/releases/), but since it is **not signed or notarized**, you will need to bypass Gatekeeper to open it. **I'm truly sorry for the inconvenience!**  
 
-1. Download the `.zip` file from the [releases page](/releases) and extract it.
+1. Download the `.zip` file from the [releases page](https://github.com/manuz888/L2Move/releases/) and extract it.
 2. Open **L2Move** by right-clicking on it, choose Open, then confirm when prompted (only required the first time).
 3. If macOS prevents **L2Move** from opening, follow these steps:
    - Open **Terminal** and run (replace `<path-to-L2Move>` with the actual location of the app):
