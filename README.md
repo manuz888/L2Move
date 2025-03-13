@@ -27,7 +27,7 @@ A binary is available in the [releases](https://github.com/manuz888/L2Move/relea
 3. If macOS prevents **L2Move** from opening, follow these steps:
    - Open **Terminal** and run (replace `<path-to-L2Move>` with the actual location of the app):
      ```sh
-     sudo xattr -rd com.apple.quarantine "<path-to-L2Move>/L2Move.app"
+     sudo xattr -cr "<path-to-L2Move>/L2Move.app"
      ```
    - Then try opening **L2Move** again.
 
